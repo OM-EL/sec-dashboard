@@ -133,6 +133,10 @@ button:hover {
   font-size: 16px;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
 }
 
 .bar-container {
@@ -195,6 +199,23 @@ button:hover {
   margin: 20px 0;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.team-details::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 2s ease;
+}
+
+.team-details:hover::before {
+  left: 100%;
 }
 
 .team-details h3 {
@@ -348,132 +369,359 @@ button:hover {
   padding: 50px;
 }
 
-/* Responsive Design */
-@media (max-width: 1200px) {
-  .app {
-    padding: 15px;
+/* Fun gamification styles */
+.particles-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* Achievement notifications */
+.achievements-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 350px;
+}
+
+.achievement-notification {
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid;
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 10px;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.achievement-icon {
+  font-size: 2rem;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.achievement-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #FFD700;
+  margin-bottom: 2px;
+}
+
+.achievement-message {
+  font-size: 0.9rem;
+  color: white;
+  opacity: 0.9;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Enhanced buttons */
+.play-btn {
+  background: linear-gradient(135deg, #4ECDC4, #45B7D1);
+  border: none;
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.play-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.play-btn:hover::before {
+  left: 100%;
+}
+
+.reset-btn {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  border: none;
+  color: white;
+  font-weight: bold;
+}
+
+/* Enhanced bar items */
+.bar-item.celebrating {
+  animation: celebrate 1s ease-in-out;
+}
+
+@keyframes celebrate {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-10px) scale(1.03); }
+  75% { transform: translateY(-5px) scale(1.01); }
+}
+
+.rank-indicator {
+  width: 50px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.rank-number {
+  display: inline-block;
+  animation: rankShine 2s ease-in-out infinite;
+}
+
+@keyframes rankShine {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.streak-indicator {
+  font-size: 0.8rem;
+  margin-left: 5px;
+  animation: flicker 1s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  border: 3px solid;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
   }
-  
-  .chart {
-    height: 500px;
-  }
-  
-  .team-label {
-    width: 100px;
-    font-size: 14px;
-  }
-  
-  .score-label {
-    font-size: 14px;
+  100% {
+    transform: translate(-50%, -50%) scale(1.3);
+    opacity: 0;
   }
 }
 
+.warning-indicator {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 1.2rem;
+  animation: warning-blink 1s ease-in-out infinite;
+}
+
+@keyframes warning-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Podium effects */
+.podium-effects {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.podium-glow {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  border-radius: 25px;
+  opacity: 0.3;
+  animation: glow 3s ease-in-out infinite;
+}
+
+.podium-glow.position-1 {
+  animation-delay: 0s;
+}
+
+.podium-glow.position-2 {
+  animation-delay: 0.5s;
+}
+
+.podium-glow.position-3 {
+  animation-delay: 1s;
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.5; }
+}
+
+/* Enhanced callouts */
+.callout.top-mover {
+  background: linear-gradient(135deg, #4ECDC4, #45B7D1);
+  position: relative;
+  overflow: hidden;
+}
+
+.callout.slowest-mover {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  position: relative;
+  overflow: hidden;
+}
+
+.callout.dark-horse {
+  background: linear-gradient(135deg, #FFEAA7, #FDCB6E);
+  position: relative;
+  overflow: hidden;
+}
+
+.sparkle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(90deg) scale(1.2); }
+  50% { transform: rotate(180deg) scale(1); }
+  75% { transform: rotate(270deg) scale(1.2); }
+}
+
+.alert-pulse {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem;
+  animation: alert-pulse 1s ease-in-out infinite;
+}
+
+@keyframes alert-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
+.shooting-star {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem;
+  animation: shooting-star 2s ease-in-out infinite;
+}
+
+@keyframes shooting-star {
+  0% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-5px) rotate(90deg); }
+  50% { transform: translateX(0) rotate(180deg); }
+  75% { transform: translateX(5px) rotate(270deg); }
+  100% { transform: translateX(0) rotate(360deg); }
+}
+
+/* Team details enhancements */
+.team-details {
+  position: relative;
+  overflow: hidden;
+}
+
+.team-details::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 2s ease;
+}
+
+.team-details:hover::before {
+  left: 100%;
+}
+
+/* Fun fact banner */
+.fun-fact-banner {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 25px;
+  padding: 10px 20px;
+  margin: 15px 0;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  animation: float 3s ease-in-out infinite;
+}
+
+.fun-fact-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #FFD700;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Sound toggle button */
+.sound-btn {
+  background: linear-gradient(135deg, #96CEB4, #FFEAA7);
+  border: none;
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.sound-btn.enabled {
+  background: linear-gradient(135deg, #4ECDC4, #45B7D1);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.sound-btn.disabled {
+  background: linear-gradient(135deg, #95A5A6, #7F8C8D);
+  opacity: 0.7;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(76, 205, 196, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(76, 205, 196, 0.8); }
+}
+
+/* Enhanced responsive design for new elements */
 @media (max-width: 768px) {
-  .app {
-    padding: 10px;
+  .fun-fact-banner {
+    padding: 8px 15px;
+    margin: 10px 0;
   }
   
-  h1 {
-    font-size: 2rem;
+  .fun-fact-text {
+    font-size: 1rem;
   }
   
-  .controls {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .speed-control {
-    flex-direction: column;
-    gap: 5px;
-    text-align: center;
-  }
-  
-  .date-display {
-    font-size: 1.4rem;
-    padding: 15px;
-  }
-  
-  .chart-container {
-    padding: 20px;
-  }
-  
-  .chart {
-    height: 400px;
-  }
-  
-  .team-label {
-    width: 80px;
-    font-size: 12px;
-    margin-right: 10px;
-  }
-  
-  .bar {
-    height: 35px;
-  }
-  
-  .bar-item {
-    height: 45px;
-  }
-  
-  .score-label {
-    font-size: 12px;
-    left: calc(100% + 10px);
-  }
-  
-  .callouts {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-  
-  .callout {
-    padding: 20px;
-  }
-  
-  .team-name {
-    font-size: 1.3rem;
-  }
-  
-  .details-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  }
-}
-
-@media (max-width: 480px) {
-  .app {
-    padding: 5px;
-  }
-  
-  h1 {
-    font-size: 1.8rem;
-  }
-  
-  .chart {
-    height: 350px;
-  }
-  
-  .team-label {
-    width: 60px;
-    font-size: 11px;
-  }
-  
-  .bar {
-    height: 30px;
-  }
-  
-  .bar-item {
-    height: 40px;
-  }
-  
-  .score-label {
-    font-size: 11px;
-  }
-  
-  .callout {
-    padding: 15px;
-  }
-  
-  .team-name {
-    font-size: 1.2rem;
+  .sound-btn {
+    font-size: 14px;
+    padding: 10px 16px;
   }
 }
   
@@ -485,3 +733,68 @@ button:hover {
     height: 25px;
   }
 
+/* Progress indicator */
+.progress-container {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar {
+  width: 200px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ECDC4, #45B7D1, #FFD700);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.date-text {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+/* Team mood indicator */
+.team-mood {
+  font-size: 1.2rem;
+  margin-left: 8px;
+  animation: mood-bounce 2s ease-in-out infinite;
+}
+
+@keyframes mood-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}

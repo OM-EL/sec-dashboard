@@ -109,7 +109,7 @@ function App() {
           const newFrame = prev + 1
           if (newFrame >= uniqueDates.length) {
             setIsPlaying(false)
-            return 0
+            return uniqueDates.length - 1 // Stay at the last frame instead of resetting
           }
           return newFrame
         })
@@ -516,6 +516,15 @@ function App() {
         </div>
 
         <div className="chart-container">
+          <div className="chart-header">
+            <h3>🎯 Team Vulnerability Count (Bar length = Vulnerability count)</h3>
+            <div className="scale-reference">
+              <span className="scale-text">Scale: 0 vulnerabilities</span>
+              <div className="scale-bar" style={{ width: '0%', background: '#4CAF50' }}></div>
+              <span className="scale-text">→ {maxVulns} vulnerabilities</span>
+              <div className="scale-bar" style={{ width: '100%', background: '#FF4444' }}></div>
+            </div>
+          </div>
           <div className="chart">
             {sortedTeams.map(([team, data], index) => (
               <BarItem
@@ -745,11 +754,9 @@ function App() {
 }
 
 const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSelected, rank, streak, isCelebrating }) => {
-  // Calculate bar width: teams with more vulnerabilities get longer bars (more intuitive)
-  const vulnerabilityRange = maxVulns - minVulns
-  const normalizedScore = vulnerabilityRange > 0 ? 
-    ((data.vuln_total_team - minVulns) / vulnerabilityRange) * 100 : 100
-  const barWidth = Math.max(normalizedScore, 5) // Minimum 5% width
+  // Calculate bar width: directly proportional to vulnerability count (more intuitive)
+  // Use the actual vulnerability count as a proportion of the maximum
+  const barWidth = Math.max((data.vuln_total_team / maxVulns) * 100, 5) // Minimum 5% width
   
   const springProps = useSpring({
     transform: `translateY(${index * 60}px)`,
@@ -829,11 +836,17 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
         >
           <div className="vulnerability-info">
             <span className="vuln-count">{data.vuln_total_team} vulns</span>
+            <span className="vuln-percentage">({Math.round((data.vuln_total_team / maxVulns) * 100)}%)</span>
           </div>
           
           {/* Warning indicator for high vulnerabilities */}
           {data.vuln_total_team > 70 && (
             <div className="warning-indicator">⚠️</div>
+          )}
+          
+          {/* Special indicator for team with most vulnerabilities */}
+          {data.vuln_total_team === maxVulns && (
+            <div className="max-vulns-indicator">🚨 MOST VULNS</div>
           )}
           
           {/* Pulse effect for very high vulnerabilities */}

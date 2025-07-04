@@ -101,6 +101,37 @@ button:hover {
   border: 1px solid rgba(255,255,255,0.2);
 }
 
+.chart-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.chart-header h3 {
+  color: white;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
+
+.scale-reference {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.8);
+}
+
+.scale-text {
+  font-size: 0.8rem;
+}
+
+.scale-bar {
+  height: 8px;
+  width: 60px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
 .chart {
   position: relative;
   height: 600px;
@@ -172,6 +203,9 @@ button:hover {
   font-weight: bold;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
   pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .vuln-count {
@@ -179,6 +213,14 @@ button:hover {
   padding: 2px 6px;
   border-radius: 10px;
   font-size: 10px;
+}
+
+.vuln-percentage {
+  background: rgba(0,0,0,0.2);
+  padding: 1px 4px;
+  border-radius: 8px;
+  font-size: 8px;
+  opacity: 0.9;
 }
 
 .score-label {
@@ -532,6 +574,32 @@ button:hover {
   right: -10px;
   font-size: 1.2rem;
   animation: warning-blink 1s ease-in-out infinite;
+}
+
+.max-vulns-indicator {
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  background: #ff4444;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  animation: critical-alert 1.5s ease-in-out infinite;
+  border: 1px solid white;
+}
+
+@keyframes critical-alert {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
 }
 
 @keyframes warning-blink {

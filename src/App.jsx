@@ -28,14 +28,16 @@ function App() {
 
   // Add Easter eggs and fun facts
   const funFacts = [
-    "🎯 Security is a team sport!",
-    "🔒 Every vulnerability fixed makes us stronger!",
-    "🚀 Small improvements compound into big wins!",
-    "🛡️ Defense is the best offense!",
-    "⚡ Speed matters, but accuracy matters more!",
-    "🎨 Beautiful code is secure code!",
-    "🔥 Consistency beats perfection!",
-    "🌟 Every commit is a chance to improve!"
+    "🎯 Security is a team sport - shortest bar wins!",
+    "🔒 Every vulnerability fixed shrinks your bar!",
+    "🚀 Small improvements = shorter bars = big wins!",
+    "🛡️ Defense shrinks the bar - offense against vulnerabilities!",
+    "⚡ Speed matters, but shorter bars matter more!",
+    "🎨 Clean code = fewer vulnerabilities = shorter bars!",
+    "🔥 Consistency in security = consistently shorter bars!",
+    "🌟 Every vulnerability fixed makes your bar shorter!",
+    "🏆 The team with the shortest bar leads the race!",
+    "💪 Security champions have the shortest bars!"
   ]
 
   // Sound effect function
@@ -67,16 +69,12 @@ function App() {
   }
 
   const colors = {
-    Alpha: '#FF6B6B',
-    Bravo: '#4ECDC4', 
-    Charlie: '#45B7D1',
-    Delta: '#96CEB4',
-    Echo: '#FFEAA7',
-    Foxtrot: '#DDA0DD',
-    Golf: '#FFA07A',
-    Hotel: '#98D8C8',
-    India: '#F7DC6F',
-    Juliet: '#BB8FCE'
+    FOO: '#FF6B6B',
+    ITO: '#4ECDC4', 
+    PMF: '#45B7D1',
+    SAM: '#96CEB4',
+    STT: '#FFEAA7',
+    ULE: '#DDA0DD'
   }
 
   // Initialize particles engine
@@ -147,7 +145,7 @@ function App() {
     playSound(type === 'first_place' ? 'levelup' : 'achievement')
     
     // Trigger confetti for major achievements
-    if (type === 'milestone' || type === 'comeback' || type === 'perfect_score') {
+    if (type === 'milestone' || type === 'comeback' || type === 'perfect_security') {
       setShowConfetti(true)
       setCelebratingTeam(team)
       setTimeout(() => {
@@ -165,19 +163,19 @@ function App() {
   // Achievement checking system
   const checkAchievements = (currentRankings, currentScores, prevRankings, prevScores) => {
     Object.keys(currentScores).forEach(team => {
-      const currentScore = currentScores[team]
-      const previousScore = prevScores[team] || currentScore
+      const currentVulns = teamData[team]?.vuln_total_team || 0
+      const previousVulns = prevScores[team] || currentVulns
       const currentRank = currentRankings[team]
       const previousRank = prevRankings[team] || currentRank
       
-      // Perfect score achievement
-      if (currentScore >= 90 && previousScore < 90) {
-        triggerAchievement('perfect_score', team, currentScore)
+      // Perfect security achievement (very few vulnerabilities)
+      if (currentVulns <= 15 && previousVulns > 15) {
+        triggerAchievement('perfect_security', team, currentVulns)
       }
       
-      // Milestone achievements
-      if (currentScore >= 85 && previousScore < 85) {
-        triggerAchievement('milestone', team, 85)
+      // Milestone achievements (good vulnerability reduction)
+      if (currentVulns <= 25 && previousVulns > 25) {
+        triggerAchievement('milestone', team, 25)
       }
       
       // Comeback achievement (moved up 3+ positions)
@@ -185,8 +183,8 @@ function App() {
         triggerAchievement('comeback', team, previousRank - currentRank)
       }
       
-      // Improvement streak
-      if (currentScore > previousScore) {
+      // Improvement streak (reducing vulnerabilities)
+      if (currentVulns < previousVulns) {
         setStreaks(prev => ({
           ...prev,
           [team]: (prev[team] || 0) + 1
@@ -195,7 +193,7 @@ function App() {
         if ((streaks[team] || 0) >= 3) {
           triggerAchievement('hot_streak', team, streaks[team])
         }
-      } else if (currentScore < previousScore) {
+      } else if (currentVulns > previousVulns) {
         setStreaks(prev => ({
           ...prev,
           [team]: 0
@@ -236,7 +234,7 @@ function App() {
         })
 
         const sortedTeams = Object.entries(teamAggregates)
-          .sort(([,a], [,b]) => b.security_score - a.security_score)
+          .sort(([,a], [,b]) => a.vuln_total_team - b.vuln_total_team)
           .slice(0, 10)
 
         const currentRankings = {}
@@ -315,10 +313,12 @@ function App() {
 
   const teamData = aggregateTeamScores()
   const sortedTeams = Object.entries(teamData)
-    .sort(([,a], [,b]) => b.security_score - a.security_score)
+    .sort(([,a], [,b]) => a.vuln_total_team - b.vuln_total_team)
     .slice(0, 10)
 
-  const maxScore = Math.max(...sortedTeams.map(([,data]) => data.security_score))
+  // Find max vulnerabilities for bar width calculation (inverted for display)
+  const maxVulns = Math.max(...sortedTeams.map(([,data]) => data.vuln_total_team))
+  const minVulns = Math.min(...sortedTeams.map(([,data]) => data.vuln_total_team))
 
   // Calculate call-outs
   const calculateCallouts = () => {
@@ -463,9 +463,10 @@ function App() {
         ))}
       </div>
       <header>
-        <h1>🏆 Security Score Race {celebratingTeam && `- ${celebratingTeam} is on fire! 🔥`}</h1>
+        <h1>🛡️ Security Vulnerability Race - Shortest Bar Wins! {celebratingTeam && `- ${celebratingTeam} is securing the lead! 🔥`}</h1>
         <div className="fun-fact-banner">
           <span className="fun-fact-text">{currentFunFact}</span>
+          <span className="visual-guide">📊 Longer bars = More vulnerabilities | 🏆 Shorter bars = Fewer vulnerabilities = Winner!</span>
         </div>
         <div className="controls">
           <button onClick={togglePlayPause} className="play-btn">
@@ -522,7 +523,8 @@ function App() {
                 team={team}
                 data={data}
                 index={index}
-                maxScore={maxScore}
+                maxVulns={maxVulns}
+                minVulns={minVulns}
                 color={colors[team]}
                 onClick={() => setSelectedTeam(selectedTeam === team ? null : team)}
                 isSelected={selectedTeam === team}
@@ -742,10 +744,16 @@ function App() {
   )
 }
 
-const BarItem = ({ team, data, index, maxScore, color, onClick, isSelected, rank, streak, isCelebrating }) => {
+const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSelected, rank, streak, isCelebrating }) => {
+  // Calculate bar width: teams with more vulnerabilities get longer bars (more intuitive)
+  const vulnerabilityRange = maxVulns - minVulns
+  const normalizedScore = vulnerabilityRange > 0 ? 
+    ((data.vuln_total_team - minVulns) / vulnerabilityRange) * 100 : 100
+  const barWidth = Math.max(normalizedScore, 5) // Minimum 5% width
+  
   const springProps = useSpring({
     transform: `translateY(${index * 60}px)`,
-    width: `${Math.max((data.security_score / maxScore) * 100, 2)}%`,
+    width: `${barWidth}%`,
     config: { tension: 300, friction: 30 }
   })
 
@@ -763,12 +771,12 @@ const BarItem = ({ team, data, index, maxScore, color, onClick, isSelected, rank
   }
 
   const getTeamMood = () => {
-    if (data.security_score >= 85) return '😎'
-    if (data.security_score >= 70) return '😊'
-    if (data.security_score >= 60) return '🙂'
-    if (data.security_score >= 50) return '😐'
-    if (data.security_score >= 40) return '😟'
-    return '😰'
+    if (data.vuln_total_team <= 20) return '😎'  // Very few vulnerabilities
+    if (data.vuln_total_team <= 35) return '😊'  // Low vulnerabilities
+    if (data.vuln_total_team <= 50) return '🙂'  // Moderate vulnerabilities
+    if (data.vuln_total_team <= 70) return '😐'  // Higher vulnerabilities
+    if (data.vuln_total_team <= 90) return '😟'  // Many vulnerabilities
+    return '😰'  // Too many vulnerabilities
   }
 
   return (
@@ -809,25 +817,31 @@ const BarItem = ({ team, data, index, maxScore, color, onClick, isSelected, rank
               `0px 0px 30px ${color}80, 0px 0px 60px ${color}40` : 
               '0px 4px 15px rgba(0,0,0,0.2)',
             transition: 'all 0.3s ease',
-            border: '2px solid rgba(255,255,255,0.2)',
-            minWidth: '20px'
+            border: data.vuln_total_team > 70 ? '2px solid #ff4444' : '2px solid rgba(255,255,255,0.2)',
+            minWidth: '20px',
+            // Add gradient overlay for high vulnerability teams
+            background: data.vuln_total_team > 70 ? 
+              `linear-gradient(135deg, ${color}, #ff4444)` : 
+              data.vuln_total_team > 50 ? 
+              `linear-gradient(135deg, ${color}, #ffaa44)` : 
+              color
           }}
         >
           <div className="vulnerability-info">
             <span className="vuln-count">{data.vuln_total_team} vulns</span>
           </div>
           
-          {/* Pulse effect for high scores */}
-          {data.security_score >= 85 && (
-            <div className="pulse-ring" style={{ borderColor: color }}></div>
-          )}
-          
-          {/* Warning indicator for low scores */}
-          {data.security_score < 60 && (
+          {/* Warning indicator for high vulnerabilities */}
+          {data.vuln_total_team > 70 && (
             <div className="warning-indicator">⚠️</div>
           )}
+          
+          {/* Pulse effect for very high vulnerabilities */}
+          {data.vuln_total_team > 90 && (
+            <div className="pulse-ring" style={{ borderColor: '#ff4444' }}></div>
+          )}
         </animated.div>
-        <span className="score-label">{data.security_score}</span>
+        <span className="score-label">{data.vuln_total_team} vulns</span>
       </div>
     </animated.div>
   )
@@ -842,39 +856,39 @@ const AchievementNotification = ({ achievement }) => {
 
   const getAchievementDetails = () => {
     switch (achievement.type) {
-      case 'perfect_score':
+      case 'perfect_security':
         return {
-          icon: '💯',
-          title: 'Perfect Score!',
-          message: `${achievement.team} achieved ${achievement.value} points!`,
+          icon: '�️',
+          title: 'Perfect Security!',
+          message: `${achievement.team} has an ultra-short bar - only ${achievement.value} vulnerabilities!`,
           color: '#FFD700'
         }
       case 'milestone':
         return {
           icon: '🎯',
-          title: 'Milestone Reached!',
-          message: `${achievement.team} hit ${achievement.value} points!`,
+          title: 'Security Milestone!',
+          message: `${achievement.team} shrunk their bar - vulnerabilities below ${achievement.value}!`,
           color: '#4ECDC4'
         }
       case 'comeback':
         return {
           icon: '🚀',
           title: 'Amazing Comeback!',
-          message: `${achievement.team} jumped ${achievement.value} positions!`,
+          message: `${achievement.team} dramatically shortened their bar - jumped ${achievement.value} positions!`,
           color: '#FF6B6B'
         }
       case 'hot_streak':
         return {
           icon: '🔥',
           title: 'Hot Streak!',
-          message: `${achievement.team} improved ${achievement.value} times in a row!`,
+          message: `${achievement.team} shrunk their bar ${achievement.value} times in a row!`,
           color: '#FFA500'
         }
       case 'first_place':
         return {
           icon: '👑',
-          title: 'New Leader!',
-          message: `${achievement.team} takes the crown!`,
+          title: 'Security Champion!',
+          message: `${achievement.team} has the shortest bar - fewest vulnerabilities!`,
           color: '#FFD700'
         }
       default:

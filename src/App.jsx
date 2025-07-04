@@ -639,7 +639,6 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
           
           {/* Removed complex pulse effects for better performance */}
         </animated.div>
-        <span className="score-label">{data.vuln_total_team} vulns</span>
       </div>
     </animated.div>
   )

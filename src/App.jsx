@@ -59,12 +59,12 @@ function App() {
   }
 
   const colors = {
-    FOO: '#FF6B6B',
-    ITO: '#4ECDC4', 
-    PMF: '#45B7D1',
-    SAM: '#96CEB4',
-    STT: '#FFEAA7',
-    ULE: '#DDA0DD'
+    FOO: '#e74c3c',
+    ITO: '#3498db', 
+    PMF: '#2980b9',
+    SAM: '#27ae60',
+    STT: '#f39c12',
+    ULE: '#9b59b6'
   }
 
   // Initialize particles engine
@@ -320,7 +320,7 @@ function App() {
         }
       },
       color: {
-        value: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7"]
+        value: ["#e74c3c", "#3498db", "#2980b9", "#27ae60", "#f39c12"]
       },
       shape: {
         type: "circle" // Simplifié de "star"
@@ -357,7 +357,7 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app w-full min-h-screen">
       {/* Confetti celebration */}
       {showConfetti && (
         <Confetti
@@ -365,7 +365,7 @@ function App() {
           height={window.innerHeight}
           numberOfPieces={200}
           recycle={false}
-          colors={['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD']}
+          colors={['#e74c3c', '#3498db', '#2980b9', '#27ae60', '#f39c12', '#9b59b6']}
         />
       )}
       
@@ -377,8 +377,8 @@ function App() {
         className="particles-bg"
       />
       
-      <header>
-        <h1>🛡️ Course aux Vulnérabilités de Sécurité - La Barre la Plus Courte Gagne ! {celebratingTeam && `- ${celebratingTeam} prend la tête ! 🔥`}</h1>
+      <header className="w-full">
+        <h1 className="text-center">🛡️ Course aux Vulnérabilités de Sécurité - La Barre la Plus Courte Gagne ! {celebratingTeam && `- ${celebratingTeam} prend la tête ! 🔥`}</h1>
         <div className="fun-fact-banner">
           <span className="fun-fact-text">{currentFunFact}</span>
           <span className="visual-guide">📊 Barres plus longues = Plus de vulnérabilités | 🏆 Barres plus courtes = Moins de vulnérabilités = Gagnant !</span>
@@ -430,7 +430,7 @@ function App() {
           </div>
         </div>
 
-        <div className="chart-container">
+        <div className="chart-container w-full max-w-none">
           <div className="chart-header">
             <h3>🎯 Nombre de Vulnérabilités par Équipe (Longueur de barre = Nombre de vulnérabilités)</h3>
             <div className="scale-reference">
@@ -440,7 +440,7 @@ function App() {
               <div className="scale-bar" style={{ width: '100%', background: '#FF4444' }}></div>
             </div>
           </div>
-          <div className="chart">
+          <div className="chart w-full">
             {sortedTeams.map(([team, data], index) => (
               <BarItem
                 key={team}

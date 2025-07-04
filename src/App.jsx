@@ -15,15 +15,11 @@ function App() {
   const [selectedTeam, setSelectedTeam] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showConfetti, setShowConfetti] = useState(false)
-  const [achievements, setAchievements] = useState([])
   const [particlesInit, setParticlesInit] = useState(false)
   const [celebratingTeam, setCelebratingTeam] = useState(null)
   const [streaks, setStreaks] = useState({})
-  const [milestones, setMilestones] = useState({})
   const [soundEnabled, setSoundEnabled] = useState(false)
-  const [hallOfFame, setHallOfFame] = useState({})
-  const [teamStats, setTeamStats] = useState({})
-  const [currentFunFact, setCurrentFunFact] = useState("🎯 Security is a team sport!")
+  const [currentFunFact, setCurrentFunFact] = useState("🎯 Security is a team sport - shortest bar wins!")
   const intervalRef = useRef(null)
 
   // Add Easter eggs and fun facts
@@ -40,7 +36,7 @@ function App() {
     "💪 Security champions have the shortest bars!"
   ]
 
-  // Sound effect function
+  // Sound effect function (simplified)
   const playSound = (type) => {
     if (!soundEnabled) return
     
@@ -52,20 +48,14 @@ function App() {
     oscillator.connect(gainNode)
     gainNode.connect(audioContext.destination)
     
-    const frequencies = {
-      achievement: 800,
-      levelup: 1000,
-      warning: 400
-    }
-    
-    oscillator.frequency.value = frequencies[type] || 600
+    oscillator.frequency.value = type === 'levelup' ? 1000 : 600
     oscillator.type = 'sine'
     
     gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2)
     
     oscillator.start(audioContext.currentTime)
-    oscillator.stop(audioContext.currentTime + 0.3)
+    oscillator.stop(audioContext.currentTime + 0.2)
   }
 
   const colors = {
@@ -83,11 +73,11 @@ function App() {
     setParticlesInit(true)
   }
 
-  // Rotate fun facts
+  // Rotate fun facts (simplified)
   useEffect(() => {
     const factInterval = setInterval(() => {
       setCurrentFunFact(funFacts[Math.floor(Math.random() * funFacts.length)])
-    }, 8000)
+    }, 10000) // Longer interval for better performance
     
     return () => clearInterval(factInterval)
   }, [])
@@ -113,7 +103,7 @@ function App() {
           }
           return newFrame
         })
-      }, 1000 / speed)
+      }, 1500 / speed) // Increased interval for smoother performance (was 1000 / speed)
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
@@ -129,84 +119,7 @@ function App() {
     }
   }, [isPlaying, speed, isLoading])
 
-  // Achievement system
-  const triggerAchievement = (type, team, value) => {
-    const newAchievement = {
-      id: Date.now() + Math.random(),
-      type,
-      team,
-      value,
-      timestamp: Date.now()
-    }
-    
-    setAchievements(prev => [...prev, newAchievement])
-    
-    // Play sound effect
-    playSound(type === 'first_place' ? 'levelup' : 'achievement')
-    
-    // Trigger confetti for major achievements
-    if (type === 'milestone' || type === 'comeback' || type === 'perfect_security') {
-      setShowConfetti(true)
-      setCelebratingTeam(team)
-      setTimeout(() => {
-        setShowConfetti(false)
-        setCelebratingTeam(null)
-      }, 3000)
-    }
-    
-    // Auto-remove achievement after 5 seconds
-    setTimeout(() => {
-      setAchievements(prev => prev.filter(a => a.id !== newAchievement.id))
-    }, 5000)
-  }
-
-  // Achievement checking system
-  const checkAchievements = (currentRankings, currentScores, prevRankings, prevScores) => {
-    Object.keys(currentScores).forEach(team => {
-      const currentVulns = teamData[team]?.vuln_total_team || 0
-      const previousVulns = prevScores[team] || currentVulns
-      const currentRank = currentRankings[team]
-      const previousRank = prevRankings[team] || currentRank
-      
-      // Perfect security achievement (very few vulnerabilities)
-      if (currentVulns <= 15 && previousVulns > 15) {
-        triggerAchievement('perfect_security', team, currentVulns)
-      }
-      
-      // Milestone achievements (good vulnerability reduction)
-      if (currentVulns <= 25 && previousVulns > 25) {
-        triggerAchievement('milestone', team, 25)
-      }
-      
-      // Comeback achievement (moved up 3+ positions)
-      if (previousRank - currentRank >= 3) {
-        triggerAchievement('comeback', team, previousRank - currentRank)
-      }
-      
-      // Improvement streak (reducing vulnerabilities)
-      if (currentVulns < previousVulns) {
-        setStreaks(prev => ({
-          ...prev,
-          [team]: (prev[team] || 0) + 1
-        }))
-        
-        if ((streaks[team] || 0) >= 3) {
-          triggerAchievement('hot_streak', team, streaks[team])
-        }
-      } else if (currentVulns > previousVulns) {
-        setStreaks(prev => ({
-          ...prev,
-          [team]: 0
-        }))
-      }
-      
-      // First place achievement
-      if (currentRank === 1 && previousRank !== 1) {
-        triggerAchievement('first_place', team, currentRank)
-      }
-    })
-  }
-
+  // Simplified data processing for better performance
   useEffect(() => {
     if (!isLoading && metricsData && metricsData.length > 0) {
       const uniqueDates = [...new Set(metricsData.map(item => item.date))].sort()
@@ -220,6 +133,7 @@ function App() {
           if (!teamAggregates[item.team]) {
             teamAggregates[item.team] = {
               security_score: 0,
+              vuln_total_team: item.vuln_total_team,
               projects: []
             }
           }
@@ -233,20 +147,31 @@ function App() {
           )
         })
 
-        const sortedTeams = Object.entries(teamAggregates)
-          .sort(([,a], [,b]) => a.vuln_total_team - b.vuln_total_team)
-          .slice(0, 10)
-
         const currentRankings = {}
         const currentScores = {}
         
-        sortedTeams.forEach(([team, data], index) => {
+        Object.entries(teamAggregates).forEach(([team, data], index) => {
           currentRankings[team] = index + 1
           currentScores[team] = data.security_score
         })
 
-        // Check for achievements and milestones
-        checkAchievements(currentRankings, currentScores, previousRankings, previousScores)
+        // Simple streak tracking without complex achievement system
+        Object.keys(currentScores).forEach(team => {
+          const currentVulns = teamAggregates[team]?.vuln_total_team || 0
+          const previousVulns = previousScores[team] || currentVulns
+          
+          if (currentVulns < previousVulns) {
+            setStreaks(prev => ({
+              ...prev,
+              [team]: (prev[team] || 0) + 1
+            }))
+          } else if (currentVulns > previousVulns) {
+            setStreaks(prev => ({
+              ...prev,
+              [team]: 0
+            }))
+          }
+        })
 
         setPreviousRankings(currentRankings)
         setPreviousScores(currentScores)
@@ -375,9 +300,7 @@ function App() {
     setPreviousScores({})
     setIsPlaying(false)
     setSelectedTeam(null)
-    setAchievements([])
     setStreaks({})
-    setMilestones({})
     setShowConfetti(false)
     setCelebratingTeam(null)
   }
@@ -390,29 +313,29 @@ function App() {
   const particlesConfig = {
     particles: {
       number: {
-        value: 50,
+        value: 20, // Reduced from 50 for better performance
         density: {
           enable: true,
-          area: 800
+          area: 1000
         }
       },
       color: {
         value: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7"]
       },
       shape: {
-        type: "star"
+        type: "circle" // Simplified from "star"
       },
       opacity: {
-        value: 0.6,
-        random: true
+        value: 0.4, // Reduced opacity
+        random: false
       },
       size: {
-        value: 3,
-        random: true
+        value: 2,
+        random: false // Disabled random for better performance
       },
       move: {
         enable: true,
-        speed: 2,
+        speed: 1, // Reduced speed
         direction: "none",
         random: false,
         straight: false,
@@ -423,16 +346,14 @@ function App() {
       detectsOn: "canvas",
       events: {
         onHover: {
-          enable: true,
-          mode: "repulse"
+          enable: false // Disabled for better performance
         },
         onClick: {
-          enable: true,
-          mode: "push"
+          enable: false // Disabled for better performance
         }
       }
     },
-    retina_detect: true
+    retina_detect: false // Disabled for better performance
   }
 
   return (
@@ -456,12 +377,6 @@ function App() {
         className="particles-bg"
       />
       
-      {/* Achievement notifications */}
-      <div className="achievements-container">
-        {achievements.map(achievement => (
-          <AchievementNotification key={achievement.id} achievement={achievement} />
-        ))}
-      </div>
       <header>
         <h1>🛡️ Security Vulnerability Race - Shortest Bar Wins! {celebratingTeam && `- ${celebratingTeam} is securing the lead! 🔥`}</h1>
         <div className="fun-fact-banner">
@@ -626,127 +541,17 @@ function App() {
           </div>
         </div>
 
+        {/* Simplified confetti for major wins only */}
         {showConfetti && (
           <div className="confetti-container">
             <Confetti
               width={window.innerWidth}
               height={window.innerHeight}
-              numberOfPieces={500}
+              numberOfPieces={100} // Reduced from 500
               recycle={false}
               onConfettiComplete={() => setShowConfetti(false)}
             />
           </div>
-        )}
-
-        {particlesInit && (
-          <Particles
-            id="tsparticles"
-            init={handleParticlesInit}
-            options={{
-              particles: {
-                number: {
-                  value: 50,
-                  density: {
-                    enable: true,
-                    value_area: 800
-                  }
-                },
-                color: {
-                  value: "#ffffff"
-                },
-                shape: {
-                  type: "circle",
-                  stroke: {
-                    width: 0,
-                    color: "#000000"
-                  },
-                  polygon: {
-                    nb_sides: 5
-                  }
-                },
-                opacity: {
-                  value: 0.5,
-                  random: false,
-                  anim: {
-                    enable: false,
-                    speed: 1,
-                    opacity_min: 0.1,
-                    sync: false
-                  }
-                },
-                size: {
-                  value: 5,
-                  random: true,
-                  anim: {
-                    enable: false,
-                    speed: 40,
-                    size_min: 0.1,
-                    sync: false
-                  }
-                },
-                line_linked: {
-                  enable: true,
-                  distance: 150,
-                  color: "#ffffff",
-                  opacity: 0.4,
-                  width: 1
-                },
-                move: {
-                  enable: true,
-                  speed: 6,
-                  direction: "none",
-                  random: false,
-                  straight: false,
-                  bounce: false,
-                  attract: {
-                    enable: false,
-                    rotateX: 600,
-                    rotateY: 1200
-                  }
-                }
-              },
-              interactivity: {
-                detect_on: "canvas",
-                events: {
-                  onhover: {
-                    enable: true,
-                    mode: "repulse"
-                  },
-                  onclick: {
-                    enable: true,
-                    mode: "push"
-                  },
-                  resize: true
-                },
-                modes: {
-                  grab: {
-                    distance: 400,
-                    line_linked: {
-                      opacity: 1
-                    }
-                  },
-                  bubble: {
-                    distance: 400,
-                    size: 40,
-                    duration: 2,
-                    opacity: 8,
-                    speed: 3
-                  },
-                  repulse: {
-                    distance: 200,
-                    duration: 2
-                  },
-                  push: {
-                    particles_nb: 4
-                  },
-                  remove: {
-                    particles_nb: 2
-                  }
-                }
-              },
-              retina_detect: true
-            }}
-          />
         )}
       </main>
     </div>
@@ -758,16 +563,11 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
   // Use the actual vulnerability count as a proportion of the maximum
   const barWidth = Math.max((data.vuln_total_team / maxVulns) * 100, 5) // Minimum 5% width
   
+  // Simplified animations for better performance
   const springProps = useSpring({
     transform: `translateY(${index * 60}px)`,
     width: `${barWidth}%`,
-    config: { tension: 300, friction: 30 }
-  })
-
-  const celebrationProps = useSpring({
-    scale: isCelebrating ? 1.05 : 1,
-    shadowOpacity: isCelebrating ? 0.8 : 0.2,
-    config: { tension: 300, friction: 20 }
+    config: { tension: 200, friction: 25 } // Reduced tension for smoother animation
   })
 
   const getRankIcon = () => {
@@ -782,7 +582,6 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
     if (data.vuln_total_team <= 35) return '😊'  // Low vulnerabilities
     if (data.vuln_total_team <= 50) return '🙂'  // Moderate vulnerabilities
     if (data.vuln_total_team <= 70) return '😐'  // Higher vulnerabilities
-    if (data.vuln_total_team <= 90) return '😟'  // Many vulnerabilities
     return '😰'  // Too many vulnerabilities
   }
 
@@ -819,18 +618,12 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
             height: '40px',
             borderRadius: '20px',
             position: 'relative',
-            transform: `scale(${celebrationProps.scale})`,
-            boxShadow: isCelebrating ? 
-              `0px 0px 30px ${color}80, 0px 0px 60px ${color}40` : 
-              '0px 4px 15px rgba(0,0,0,0.2)',
-            transition: 'all 0.3s ease',
+            transition: 'all 0.2s ease', // Reduced transition time
             border: data.vuln_total_team > 70 ? '2px solid #ff4444' : '2px solid rgba(255,255,255,0.2)',
             minWidth: '20px',
-            // Add gradient overlay for high vulnerability teams
+            // Simplified gradient for better performance
             background: data.vuln_total_team > 70 ? 
               `linear-gradient(135deg, ${color}, #ff4444)` : 
-              data.vuln_total_team > 50 ? 
-              `linear-gradient(135deg, ${color}, #ffaa44)` : 
               color
           }}
         >
@@ -839,20 +632,12 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
             <span className="vuln-percentage">({Math.round((data.vuln_total_team / maxVulns) * 100)}%)</span>
           </div>
           
-          {/* Warning indicator for high vulnerabilities */}
-          {data.vuln_total_team > 70 && (
-            <div className="warning-indicator">⚠️</div>
-          )}
-          
-          {/* Special indicator for team with most vulnerabilities */}
+          {/* Simplified indicators */}
           {data.vuln_total_team === maxVulns && (
             <div className="max-vulns-indicator">🚨 MOST VULNS</div>
           )}
           
-          {/* Pulse effect for very high vulnerabilities */}
-          {data.vuln_total_team > 90 && (
-            <div className="pulse-ring" style={{ borderColor: '#ff4444' }}></div>
-          )}
+          {/* Removed complex pulse effects for better performance */}
         </animated.div>
         <span className="score-label">{data.vuln_total_team} vulns</span>
       </div>

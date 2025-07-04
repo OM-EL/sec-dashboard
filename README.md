@@ -1,29 +1,29 @@
-# Security Dashboard
+# Tableau de Bord de Sécurité
 
-A real-time security metrics dashboard built with React and Vite, featuring animated racing bar charts to visualize team security scores over time.
+Un tableau de bord de métriques de sécurité en temps réel construit avec React et Vite, avec des graphiques à barres animées pour visualiser les scores de sécurité des équipes au fil du temps.
 
-## 🚀 Features
+## 🚀 Fonctionnalités
 
-- **Real-time Animation**: Watch security scores evolve over time with smooth animations
-- **Interactive Racing Chart**: Animated bar chart showing team rankings and security scores
-- **Team Details**: Click on any team to view detailed vulnerability breakdown
-- **Playback Controls**: Play, pause, and control animation speed
-- **Responsive Design**: Modern UI that works on different screen sizes
+- **Animation en Temps Réel**: Regardez les scores de sécurité évoluer dans le temps avec des animations fluides
+- **Graphique de Course Interactif**: Graphique à barres animé montrant les classements et scores de sécurité des équipes
+- **Détails des Équipes**: Cliquez sur n'importe quelle équipe pour voir la répartition détaillée des vulnérabilités
+- **Contrôles de Lecture**: Lecture, pause et contrôle de la vitesse d'animation
+- **Design Responsif**: Interface moderne qui fonctionne sur différentes tailles d'écran
 
-## 📋 Prerequisites
+## 📋 Prérequis
 
-- Node.js (v16 or higher)
-- npm or yarn package manager
+- Node.js (v16 ou plus récent)
+- npm ou yarn comme gestionnaire de paquets
 
 ## 🛠️ Installation
 
-1. Clone the repository:
+1. Clonez le dépôt:
 ```bash
 git clone https://github.com/OM-EL/sec-dashboard.git
 cd sec-dashboard
 ```
 
-2. Install dependencies:
+2. Installez les dépendances:
 ```bash
 npm install
 ```

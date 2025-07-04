@@ -24,19 +24,19 @@ function App() {
 
   // Add Easter eggs and fun facts
   const funFacts = [
-    "🎯 Security is a team sport - shortest bar wins!",
-    "🔒 Every vulnerability fixed shrinks your bar!",
-    "🚀 Small improvements = shorter bars = big wins!",
-    "🛡️ Defense shrinks the bar - offense against vulnerabilities!",
-    "⚡ Speed matters, but shorter bars matter more!",
-    "🎨 Clean code = fewer vulnerabilities = shorter bars!",
-    "🔥 Consistency in security = consistently shorter bars!",
-    "🌟 Every vulnerability fixed makes your bar shorter!",
-    "🏆 The team with the shortest bar leads the race!",
-    "💪 Security champions have the shortest bars!"
+    "🎯 La sécurité est un sport d'équipe - la barre la plus courte gagne !",
+    "🔒 Chaque vulnérabilité corrigée réduit votre barre !",
+    "🚀 Petites améliorations = barres plus courtes = grandes victoires !",
+    "🛡️ La défense réduit la barre - offensive contre les vulnérabilités !",
+    "⚡ La vitesse compte, mais les barres plus courtes comptent plus !",
+    "🎨 Code propre = moins de vulnérabilités = barres plus courtes !",
+    "🔥 Cohérence en sécurité = barres constamment plus courtes !",
+    "🌟 Chaque vulnérabilité corrigée raccourcit votre barre !",
+    "🏆 L'équipe avec la barre la plus courte mène la course !",
+    "💪 Les champions de sécurité ont les barres les plus courtes !"
   ]
 
-  // Sound effect function (simplified)
+  // Fonction d'effet sonore (simplifiée)
   const playSound = (type) => {
     if (!soundEnabled) return
     
@@ -73,7 +73,7 @@ function App() {
     setParticlesInit(true)
   }
 
-  // Rotate fun facts (simplified)
+  // Rotation des faits amusants (simplifiée)
   useEffect(() => {
     const factInterval = setInterval(() => {
       setCurrentFunFact(funFacts[Math.floor(Math.random() * funFacts.length)])
@@ -119,7 +119,7 @@ function App() {
     }
   }, [isPlaying, speed, isLoading])
 
-  // Simplified data processing for better performance
+  // Traitement des données simplifié pour de meilleures performances
   useEffect(() => {
     if (!isLoading && metricsData && metricsData.length > 0) {
       const uniqueDates = [...new Set(metricsData.map(item => item.date))].sort()
@@ -241,7 +241,7 @@ function App() {
     .sort(([,a], [,b]) => a.vuln_total_team - b.vuln_total_team)
     .slice(0, 10)
 
-  // Find max vulnerabilities for bar width calculation (inverted for display)
+  // Trouver le maximum de vulnérabilités pour le calcul de la largeur des barres (inversé pour l'affichage)
   const maxVulns = Math.max(...sortedTeams.map(([,data]) => data.vuln_total_team))
   const minVulns = Math.min(...sortedTeams.map(([,data]) => data.vuln_total_team))
 
@@ -313,7 +313,7 @@ function App() {
   const particlesConfig = {
     particles: {
       number: {
-        value: 20, // Reduced from 50 for better performance
+        value: 20, // Réduit de 50 pour de meilleures performances
         density: {
           enable: true,
           area: 1000
@@ -323,10 +323,10 @@ function App() {
         value: ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7"]
       },
       shape: {
-        type: "circle" // Simplified from "star"
+        type: "circle" // Simplifié de "star"
       },
       opacity: {
-        value: 0.4, // Reduced opacity
+        value: 0.4, // Opacité réduite
         random: false
       },
       size: {
@@ -335,7 +335,7 @@ function App() {
       },
       move: {
         enable: true,
-        speed: 1, // Reduced speed
+        speed: 1, // Vitesse réduite
         direction: "none",
         random: false,
         straight: false,
@@ -378,24 +378,24 @@ function App() {
       />
       
       <header>
-        <h1>🛡️ Security Vulnerability Race - Shortest Bar Wins! {celebratingTeam && `- ${celebratingTeam} is securing the lead! 🔥`}</h1>
+        <h1>🛡️ Course aux Vulnérabilités de Sécurité - La Barre la Plus Courte Gagne ! {celebratingTeam && `- ${celebratingTeam} prend la tête ! 🔥`}</h1>
         <div className="fun-fact-banner">
           <span className="fun-fact-text">{currentFunFact}</span>
-          <span className="visual-guide">📊 Longer bars = More vulnerabilities | 🏆 Shorter bars = Fewer vulnerabilities = Winner!</span>
+          <span className="visual-guide">📊 Barres plus longues = Plus de vulnérabilités | 🏆 Barres plus courtes = Moins de vulnérabilités = Gagnant !</span>
         </div>
         <div className="controls">
           <button onClick={togglePlayPause} className="play-btn">
-            {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+            {isPlaying ? '⏸️ Pause' : '▶️ Lecture'}
           </button>
-          <button onClick={resetRace} className="reset-btn">🔄 Reset</button>
+          <button onClick={resetRace} className="reset-btn">🔄 Réinitialiser</button>
           <button 
             onClick={() => setSoundEnabled(!soundEnabled)} 
             className={`sound-btn ${soundEnabled ? 'enabled' : 'disabled'}`}
           >
-            {soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF'}
+            {soundEnabled ? '🔊 Son ACTIVÉ' : '🔇 Son DÉSACTIVÉ'}
           </button>
           <div className="speed-control">
-            <label>Speed: {speed}x</label>
+            <label>Vitesse: {speed}x</label>
             <input
               type="range"
               min="0.2"
@@ -425,18 +425,18 @@ function App() {
               />
             </div>
             <div className="progress-text">
-              {currentFrame + 1} / {uniqueDates.length} checkpoints
+              {currentFrame + 1} / {uniqueDates.length} points de contrôle
             </div>
           </div>
         </div>
 
         <div className="chart-container">
           <div className="chart-header">
-            <h3>🎯 Team Vulnerability Count (Bar length = Vulnerability count)</h3>
+            <h3>🎯 Nombre de Vulnérabilités par Équipe (Longueur de barre = Nombre de vulnérabilités)</h3>
             <div className="scale-reference">
-              <span className="scale-text">Scale: 0 vulnerabilities</span>
+              <span className="scale-text">Échelle: 0 vulnérabilités</span>
               <div className="scale-bar" style={{ width: '0%', background: '#4CAF50' }}></div>
-              <span className="scale-text">→ {maxVulns} vulnerabilities</span>
+              <span className="scale-text">→ {maxVulns} vulnérabilités</span>
               <div className="scale-bar" style={{ width: '100%', background: '#FF4444' }}></div>
             </div>
           </div>
@@ -479,7 +479,7 @@ function App() {
             <h3>📊 {selectedTeam} Team Details</h3>
             <div className="details-grid">
               <div className="detail-card">
-                <h4>Total Vulnerabilities</h4>
+                <h4>Total des Vulnérabilités</h4>
                 <div className="big-number">{teamData[selectedTeam].vuln_total_team}</div>
               </div>
               <div className="detail-card critical">
@@ -506,7 +506,7 @@ function App() {
                   <div key={idx} className="project-card">
                     <div className="project-name">{project.project}</div>
                     <div className="project-score">Score: {project.security_score}</div>
-                    <div className="project-vulns">{project.vuln_total_project} vulnerabilities</div>
+                    <div className="project-vulns">{project.vuln_total_project} vulnérabilités</div>
                   </div>
                 ))}
               </div>
@@ -541,13 +541,13 @@ function App() {
           </div>
         </div>
 
-        {/* Simplified confetti for major wins only */}
+        {/* Confettis simplifiés pour les grandes victoires seulement */}
         {showConfetti && (
           <div className="confetti-container">
             <Confetti
               width={window.innerWidth}
               height={window.innerHeight}
-              numberOfPieces={100} // Reduced from 500
+              numberOfPieces={100} // Réduit de 500
               recycle={false}
               onConfettiComplete={() => setShowConfetti(false)}
             />
@@ -559,15 +559,15 @@ function App() {
 }
 
 const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSelected, rank, streak, isCelebrating }) => {
-  // Calculate bar width: directly proportional to vulnerability count (more intuitive)
+  // Calculer la largeur de la barre : directement proportionnelle au nombre de vulnérabilités (plus intuitif)
   // Use the actual vulnerability count as a proportion of the maximum
-  const barWidth = Math.max((data.vuln_total_team / maxVulns) * 100, 5) // Minimum 5% width
+  const barWidth = Math.max((data.vuln_total_team / maxVulns) * 100, 5) // Largeur minimale de 5%
   
-  // Simplified animations for better performance
+  // Animations simplifiées pour de meilleures performances
   const springProps = useSpring({
     transform: `translateY(${index * 60}px)`,
     width: `${barWidth}%`,
-    config: { tension: 200, friction: 25 } // Reduced tension for smoother animation
+    config: { tension: 200, friction: 25 } // Tension réduite pour une animation plus fluide
   })
 
   const getRankIcon = () => {
@@ -578,11 +578,11 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
   }
 
   const getTeamMood = () => {
-    if (data.vuln_total_team <= 20) return '😎'  // Very few vulnerabilities
-    if (data.vuln_total_team <= 35) return '😊'  // Low vulnerabilities
-    if (data.vuln_total_team <= 50) return '🙂'  // Moderate vulnerabilities
-    if (data.vuln_total_team <= 70) return '😐'  // Higher vulnerabilities
-    return '😰'  // Too many vulnerabilities
+    if (data.vuln_total_team <= 20) return '😎'  // Très peu de vulnérabilités
+    if (data.vuln_total_team <= 35) return '😊'  // Faibles vulnérabilités
+    if (data.vuln_total_team <= 50) return '🙂'  // Vulnérabilités modérées
+    if (data.vuln_total_team <= 70) return '😐'  // Vulnérabilités élevées
+    return '😰'  // Trop de vulnérabilités
   }
 
   return (
@@ -618,10 +618,10 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
             height: '40px',
             borderRadius: '20px',
             position: 'relative',
-            transition: 'all 0.2s ease', // Reduced transition time
+            transition: 'all 0.2s ease', // Temps de transition réduit
             border: data.vuln_total_team > 70 ? '2px solid #ff4444' : '2px solid rgba(255,255,255,0.2)',
             minWidth: '20px',
-            // Simplified gradient for better performance
+            // Dégradé simplifié pour de meilleures performances
             background: data.vuln_total_team > 70 ? 
               `linear-gradient(135deg, ${color}, #ff4444)` : 
               color
@@ -632,12 +632,12 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
             <span className="vuln-percentage">({Math.round((data.vuln_total_team / maxVulns) * 100)}%)</span>
           </div>
           
-          {/* Simplified indicators */}
+          {/* Indicateurs simplifiés */}
           {data.vuln_total_team === maxVulns && (
-            <div className="max-vulns-indicator">🚨 MOST VULNS</div>
+            <div className="max-vulns-indicator">🚨 PLUS DE VULNS</div>
           )}
           
-          {/* Removed complex pulse effects for better performance */}
+          {/* Effets de pulsation complexes supprimés pour de meilleures performances */}
         </animated.div>
       </div>
     </animated.div>
@@ -656,43 +656,43 @@ const AchievementNotification = ({ achievement }) => {
       case 'perfect_security':
         return {
           icon: '�️',
-          title: 'Perfect Security!',
-          message: `${achievement.team} has an ultra-short bar - only ${achievement.value} vulnerabilities!`,
+          title: 'Sécurité Parfaite !',
+          message: `${achievement.team} a une barre ultra-courte - seulement ${achievement.value} vulnérabilités !`,
           color: '#FFD700'
         }
       case 'milestone':
         return {
           icon: '🎯',
-          title: 'Security Milestone!',
-          message: `${achievement.team} shrunk their bar - vulnerabilities below ${achievement.value}!`,
+          title: 'Jalon de Sécurité !',
+          message: `${achievement.team} a réduit sa barre - vulnérabilités en dessous de ${achievement.value} !`,
           color: '#4ECDC4'
         }
       case 'comeback':
         return {
           icon: '🚀',
-          title: 'Amazing Comeback!',
-          message: `${achievement.team} dramatically shortened their bar - jumped ${achievement.value} positions!`,
+          title: 'Retour Spectaculaire !',
+          message: `${achievement.team} a considérablement raccourci sa barre - bondi de ${achievement.value} positions !`,
           color: '#FF6B6B'
         }
       case 'hot_streak':
         return {
           icon: '🔥',
-          title: 'Hot Streak!',
-          message: `${achievement.team} shrunk their bar ${achievement.value} times in a row!`,
+          title: 'Série de Succès !',
+          message: `${achievement.team} a réduit sa barre ${achievement.value} fois de suite !`,
           color: '#FFA500'
         }
       case 'first_place':
         return {
           icon: '👑',
-          title: 'Security Champion!',
-          message: `${achievement.team} has the shortest bar - fewest vulnerabilities!`,
+          title: 'Champion de Sécurité !',
+          message: `${achievement.team} a la barre la plus courte - le moins de vulnérabilités !`,
           color: '#FFD700'
         }
       default:
         return {
           icon: '🎉',
-          title: 'Achievement!',
-          message: `${achievement.team} did something awesome!`,
+          title: 'Réussite !',
+          message: `${achievement.team} a fait quelque chose de formidable !`,
           color: '#96CEB4'
         }
     }

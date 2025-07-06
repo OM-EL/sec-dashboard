@@ -3,8 +3,8 @@ import { useSpring, animated } from 'react-spring'
 import Confetti from 'react-confetti'
 import Particles from '@tsparticles/react'
 import { loadSlim } from '@tsparticles/slim'
+import SecurityEChart from './SecurityEChart'
 import metricsData from './metrics.json'
-import './App.css'
 
 function App() {
   const [currentFrame, setCurrentFrame] = useState(0)
@@ -182,16 +182,24 @@ function App() {
   // Early returns after all hooks
   if (isLoading) {
     return (
-      <div className="app">
-        <div className="loading">Loading...</div>
+      <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <div className="text-xl font-semibold text-white">Loading Dashboard...</div>
+          <div className="text-gray-400">Preparing security metrics</div>
+        </div>
       </div>
     )
   }
 
   if (!metricsData || metricsData.length === 0) {
     return (
-      <div className="app">
-        <div className="error">No data available. Please check metrics.json file.</div>
+      <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black flex items-center justify-center">
+        <div className="text-center bg-red-900/20 border border-red-700/50 rounded-lg p-8">
+          <div className="text-6xl mb-4">⚠️</div>
+          <div className="text-xl font-semibold text-red-400 mb-2">No Data Available</div>
+          <div className="text-gray-400">Please check the metrics.json file</div>
+        </div>
       </div>
     )
   }
@@ -357,7 +365,7 @@ function App() {
   }
 
   return (
-    <div className="app w-full min-h-screen">
+    <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black text-white relative overflow-hidden">
       {/* Confetti celebration */}
       {showConfetti && (
         <Confetti
@@ -374,73 +382,137 @@ function App() {
         id="tsparticles"
         init={initParticles}
         options={particlesConfig}
-        className="particles-bg"
+        className="absolute inset-0 z-0"
       />
       
-      <header className="w-full">
-        <h1 className="text-center">🛡️ Course aux Vulnérabilités de Sécurité - La Barre la Plus Courte Gagne ! {celebratingTeam && `- ${celebratingTeam} prend la tête ! 🔥`}</h1>
-        <div className="fun-fact-banner">
-          <span className="fun-fact-text">{currentFunFact}</span>
-          <span className="visual-guide">📊 Barres plus longues = Plus de vulnérabilités | 🏆 Barres plus courtes = Moins de vulnérabilités = Gagnant !</span>
-        </div>
-        <div className="controls">
-          <button onClick={togglePlayPause} className="play-btn">
-            {isPlaying ? '⏸️ Pause' : '▶️ Lecture'}
-          </button>
-          <button onClick={resetRace} className="reset-btn">🔄 Réinitialiser</button>
-          <button 
-            onClick={() => setSoundEnabled(!soundEnabled)} 
-            className={`sound-btn ${soundEnabled ? 'enabled' : 'disabled'}`}
-          >
-            {soundEnabled ? '🔊 Son ACTIVÉ' : '🔇 Son DÉSACTIVÉ'}
-          </button>
-          <div className="speed-control">
-            <label>Vitesse: {speed}x</label>
-            <input
-              type="range"
-              min="0.2"
-              max="3"
-              step="0.2"
-              value={speed}
-              onChange={(e) => setSpeed(parseFloat(e.target.value))}
-            />
+      {/* Header */}
+      <header className="relative z-10 w-full p-6 border-b border-gray-700/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl md:text-4xl font-bold text-center bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-4">
+            🛡️ Security Vulnerability Race Dashboard
+            {celebratingTeam && (
+              <span className="block text-lg md:text-xl text-yellow-400 mt-2">
+                🔥 {celebratingTeam} is leading the charge!
+              </span>
+            )}
+          </h1>
+          
+          {/* Fun fact banner */}
+          <div className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 rounded-lg p-4 mb-6">
+            <div className="text-center">
+              <div className="text-sm md:text-base font-medium text-indigo-300 mb-2">
+                {currentFunFact}
+              </div>
+              <div className="text-xs md:text-sm text-gray-400">
+                📊 Longer bars = More vulnerabilities | 🏆 Shorter bars = Fewer vulnerabilities = Winner!
+              </div>
+            </div>
+          </div>
+          
+          {/* Controls */}
+          <div className="flex flex-wrap justify-center gap-4 items-center">
+            <button 
+              onClick={togglePlayPause}
+              className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+            >
+              {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+            </button>
+            
+            <button 
+              onClick={resetRace}
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+            >
+              🔄 Reset
+            </button>
+            
+            <button 
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg ${
+                soundEnabled 
+                  ? 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600' 
+                  : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
+              }`}
+            >
+              {soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF'}
+            </button>
+            
+            <div className="flex flex-col items-center space-y-2">
+              <label className="text-sm font-medium text-gray-300">
+                Speed: {speed}x
+              </label>
+              <input
+                type="range"
+                min="0.2"
+                max="3"
+                step="0.2"
+                value={speed}
+                onChange={(e) => setSpeed(parseFloat(e.target.value))}
+                className="w-24 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+              />
+            </div>
           </div>
         </div>
       </header>
 
-      <main>
-        <div className="date-display">
-          <div className="date-text">
-            {new Date(currentDate).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
+      {/* Main content */}
+      <main className="relative z-10 max-w-7xl mx-auto p-6">
+        {/* Date and Progress Display */}
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 mb-6 border border-gray-700/50">
+          <div className="text-center mb-4">
+            <div className="text-2xl md:text-3xl font-bold text-blue-400 mb-2">
+              {new Date(currentDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </div>
+            <div className="text-sm text-gray-400">
+              Checkpoint {currentFrame + 1} of {uniqueDates.length}
+            </div>
           </div>
-          <div className="progress-container">
-            <div className="progress-bar">
-              <div 
-                className="progress-fill"
-                style={{ width: `${((currentFrame + 1) / uniqueDates.length) * 100}%` }}
-              />
-            </div>
-            <div className="progress-text">
-              {currentFrame + 1} / {uniqueDates.length} points de contrôle
-            </div>
+          
+          <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 ease-out"
+              style={{ width: `${((currentFrame + 1) / uniqueDates.length) * 100}%` }}
+            />
           </div>
         </div>
 
-        <div className="chart-container w-full max-w-none">
-          <div className="chart-header">
-            <h3>🎯 Nombre de Vulnérabilités par Équipe (Longueur de barre = Nombre de vulnérabilités)</h3>
-            <div className="scale-reference">
-              <span className="scale-text">Échelle: 0 vulnérabilités</span>
-              <div className="scale-bar" style={{ width: '0%', background: '#4CAF50' }}></div>
-              <span className="scale-text">→ {maxVulns} vulnérabilités</span>
-              <div className="scale-bar" style={{ width: '100%', background: '#FF4444' }}></div>
+        {/* ECharts Visualization */}
+        <div className="mb-8">
+          <SecurityEChart 
+            data={metricsData}
+            currentFrame={currentFrame}
+            colors={colors}
+          />
+        </div>
+
+        {/* Racing Chart */}
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700/50 mb-6">
+          <div className="mb-6">
+            <h3 className="text-xl md:text-2xl font-bold text-center mb-2">
+              🎯 Vulnerability Count by Team
+            </h3>
+            <div className="text-center text-sm text-gray-400">
+              Bar length = Number of vulnerabilities
+            </div>
+            
+            {/* Scale reference */}
+            <div className="flex items-center justify-center space-x-4 mt-4 text-xs">
+              <div className="flex items-center space-x-2">
+                <span className="text-green-400">0 vulnerabilities</span>
+                <div className="w-8 h-2 bg-green-500 rounded"></div>
+              </div>
+              <span className="text-gray-400">→</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-2 bg-red-500 rounded"></div>
+                <span className="text-red-400">{maxVulns} vulnerabilities</span>
+              </div>
             </div>
           </div>
-          <div className="chart w-full">
+          
+          <div className="relative h-96 overflow-hidden">
             {sortedTeams.map(([team, data], index) => (
               <BarItem
                 key={team}
@@ -455,58 +527,55 @@ function App() {
                 rank={index + 1}
                 streak={streaks[team] || 0}
                 isCelebrating={celebratingTeam === team}
-                />
-              ))}
-            </div>
-            
-            {/* Podium effects for top 3 */}
-            <div className="podium-effects">
-              {sortedTeams.slice(0, 3).map(([team, data], index) => (
-                <div 
-                  key={team}
-                  className={`podium-glow position-${index + 1}`}
-                  style={{
-                    transform: `translateY(${index * 60}px)`,
-                    background: `radial-gradient(circle, ${colors[team]}30, transparent)`
-                  }}
-                />
-              ))}
-            </div>
+              />
+            ))}
+          </div>
         </div>
 
+        {/* Team Details */}
         {selectedTeam && (
-          <div className="team-details">
-            <h3>📊 {selectedTeam} Team Details</h3>
-            <div className="details-grid">
-              <div className="detail-card">
-                <h4>Total des Vulnérabilités</h4>
-                <div className="big-number">{teamData[selectedTeam].vuln_total_team}</div>
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700/50 mb-6">
+            <h3 className="text-xl md:text-2xl font-bold mb-4 text-center">
+              📊 {selectedTeam} Team Details
+            </h3>
+            
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+              <div className="bg-gray-700/50 rounded-lg p-4 text-center">
+                <h4 className="text-sm font-medium text-gray-300 mb-2">Total Vulnerabilities</h4>
+                <div className="text-2xl font-bold text-red-400">{teamData[selectedTeam].vuln_total_team}</div>
               </div>
-              <div className="detail-card critical">
-                <h4>Critical</h4>
-                <div className="big-number">{teamData[selectedTeam].total_critical}</div>
+              
+              <div className="bg-red-900/30 rounded-lg p-4 text-center border border-red-700/50">
+                <h4 className="text-sm font-medium text-red-300 mb-2">Critical</h4>
+                <div className="text-2xl font-bold text-red-400">{teamData[selectedTeam].total_critical}</div>
               </div>
-              <div className="detail-card high">
-                <h4>High</h4>
-                <div className="big-number">{teamData[selectedTeam].total_high}</div>
+              
+              <div className="bg-orange-900/30 rounded-lg p-4 text-center border border-orange-700/50">
+                <h4 className="text-sm font-medium text-orange-300 mb-2">High</h4>
+                <div className="text-2xl font-bold text-orange-400">{teamData[selectedTeam].total_high}</div>
               </div>
-              <div className="detail-card medium">
-                <h4>Medium</h4>
-                <div className="big-number">{teamData[selectedTeam].total_medium}</div>
+              
+              <div className="bg-yellow-900/30 rounded-lg p-4 text-center border border-yellow-700/50">
+                <h4 className="text-sm font-medium text-yellow-300 mb-2">Medium</h4>
+                <div className="text-2xl font-bold text-yellow-400">{teamData[selectedTeam].total_medium}</div>
               </div>
-              <div className="detail-card low">
-                <h4>Low</h4>
-                <div className="big-number">{teamData[selectedTeam].total_low}</div>
+              
+              <div className="bg-blue-900/30 rounded-lg p-4 text-center border border-blue-700/50">
+                <h4 className="text-sm font-medium text-blue-300 mb-2">Low</h4>
+                <div className="text-2xl font-bold text-blue-400">{teamData[selectedTeam].total_low}</div>
               </div>
             </div>
-            <div className="projects-list">
-              <h4>Projects ({teamData[selectedTeam].projects.length})</h4>
-              <div className="projects-grid">
+            
+            <div>
+              <h4 className="text-lg font-semibold mb-3">
+                Projects ({teamData[selectedTeam].projects.length})
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {teamData[selectedTeam].projects.map((project, idx) => (
-                  <div key={idx} className="project-card">
-                    <div className="project-name">{project.project}</div>
-                    <div className="project-score">Score: {project.security_score}</div>
-                    <div className="project-vulns">{project.vuln_total_project} vulnérabilités</div>
+                  <div key={idx} className="bg-gray-700/50 rounded-lg p-4 border border-gray-600/50">
+                    <div className="font-medium text-blue-300 mb-1">{project.project}</div>
+                    <div className="text-sm text-gray-400">Score: {project.security_score}</div>
+                    <div className="text-sm text-red-400">{project.vuln_total_project} vulnerabilities</div>
                   </div>
                 ))}
               </div>
@@ -514,60 +583,61 @@ function App() {
           </div>
         )}
 
-        <div className="callouts">
-          <div className="callout top-mover">
-            <h3>🚀 Top Mover</h3>
-            <div className="team-name">{topMover?.team || '-'}</div>
-            <div className="value">
+        {/* Callouts */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-green-800/30 to-emerald-800/30 rounded-lg p-6 border border-green-700/50">
+            <h3 className="text-lg font-bold text-green-300 mb-2 flex items-center">
+              🚀 <span className="ml-2">Top Mover</span>
+            </h3>
+            <div className="text-2xl font-bold text-white mb-1">
+              {topMover?.team || '-'}
+            </div>
+            <div className="text-lg text-green-400">
               {topMover ? `+${topMover.delta.toFixed(1)}` : '-'}
             </div>
-            {topMover && <div className="sparkle">✨</div>}
+            {topMover && <div className="text-xl">✨</div>}
           </div>
-          <div className="callout slowest-mover">
-            <h3>� Needs Boost</h3>
-            <div className="team-name">{slowestMover?.team || '-'}</div>
-            <div className="value">
+          
+          <div className="bg-gradient-to-br from-orange-800/30 to-red-800/30 rounded-lg p-6 border border-orange-700/50">
+            <h3 className="text-lg font-bold text-orange-300 mb-2 flex items-center">
+              🐢 <span className="ml-2">Needs Boost</span>
+            </h3>
+            <div className="text-2xl font-bold text-white mb-1">
+              {slowestMover?.team || '-'}
+            </div>
+            <div className="text-lg text-orange-400">
               {slowestMover ? `${slowestMover.delta.toFixed(1)}` : '-'}
             </div>
-            {slowestMover && <div className="alert-pulse">⚠️</div>}
+            {slowestMover && <div className="text-xl animate-pulse">⚠️</div>}
           </div>
-          <div className="callout dark-horse">
-            <h3>� Dark Horse</h3>
-            <div className="team-name">{darkHorse?.team || '-'}</div>
-            <div className="value">
+          
+          <div className="bg-gradient-to-br from-purple-800/30 to-pink-800/30 rounded-lg p-6 border border-purple-700/50">
+            <h3 className="text-lg font-bold text-purple-300 mb-2 flex items-center">
+              🦄 <span className="ml-2">Dark Horse</span>
+            </h3>
+            <div className="text-2xl font-bold text-white mb-1">
+              {darkHorse?.team || '-'}
+            </div>
+            <div className="text-lg text-purple-400">
               {darkHorse ? `+${darkHorse.improvement} ranks` : '-'}
             </div>
-            {darkHorse && <div className="shooting-star">⭐</div>}
+            {darkHorse && <div className="text-xl animate-bounce">⭐</div>}
           </div>
         </div>
-
-        {/* Confettis simplifiés pour les grandes victoires seulement */}
-        {showConfetti && (
-          <div className="confetti-container">
-            <Confetti
-              width={window.innerWidth}
-              height={window.innerHeight}
-              numberOfPieces={100} // Réduit de 500
-              recycle={false}
-              onConfettiComplete={() => setShowConfetti(false)}
-            />
-          </div>
-        )}
       </main>
     </div>
   )
 }
 
 const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSelected, rank, streak, isCelebrating }) => {
-  // Calculer la largeur de la barre : directement proportionnelle au nombre de vulnérabilités (plus intuitif)
-  // Use the actual vulnerability count as a proportion of the maximum
-  const barWidth = Math.max((data.vuln_total_team / maxVulns) * 100, 5) // Largeur minimale de 5%
+  // Calculate bar width: directly proportional to vulnerability count
+  const barWidth = Math.max((data.vuln_total_team / maxVulns) * 100, 5) // Minimum 5% width
   
-  // Animations simplifiées pour de meilleures performances
+  // Simplified animations for better performance
   const springProps = useSpring({
     transform: `translateY(${index * 60}px)`,
     width: `${barWidth}%`,
-    config: { tension: 200, friction: 25 } // Tension réduite pour une animation plus fluide
+    config: { tension: 200, friction: 25 }
   })
 
   const getRankIcon = () => {
@@ -578,66 +648,67 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
   }
 
   const getTeamMood = () => {
-    if (data.vuln_total_team <= 20) return '😎'  // Très peu de vulnérabilités
-    if (data.vuln_total_team <= 35) return '😊'  // Faibles vulnérabilités
-    if (data.vuln_total_team <= 50) return '🙂'  // Vulnérabilités modérées
-    if (data.vuln_total_team <= 70) return '😐'  // Vulnérabilités élevées
-    return '😰'  // Trop de vulnérabilités
+    if (data.vuln_total_team <= 20) return '😎'  // Very few vulnerabilities
+    if (data.vuln_total_team <= 35) return '😊'  // Low vulnerabilities
+    if (data.vuln_total_team <= 50) return '🙂'  // Moderate vulnerabilities
+    if (data.vuln_total_team <= 70) return '😐'  // High vulnerabilities
+    return '😰'  // Too many vulnerabilities
   }
 
   return (
     <animated.div
-      className={`bar-item ${isSelected ? 'selected' : ''} ${isCelebrating ? 'celebrating' : ''}`}
+      className={`absolute left-0 w-full h-12 flex items-center z-10 cursor-pointer transition-all duration-200 ${
+        isSelected ? 'bg-gray-700/30 rounded-lg' : ''
+      } ${isCelebrating ? 'animate-pulse' : ''}`}
       style={{
         transform: springProps.transform,
-        position: 'absolute',
-        left: 0,
-        width: '100%',
-        height: '50px',
-        display: 'flex',
-        alignItems: 'center',
-        zIndex: 10 - index,
-        cursor: 'pointer'
+        zIndex: 10 - index
       }}
       onClick={onClick}
     >
-      <div className="rank-indicator">
-        <span className="rank-number">{getRankIcon()}</span>
+      {/* Rank indicator */}
+      <div className="flex items-center justify-center w-12 h-12 text-lg font-bold">
+        <span className="text-yellow-400">{getRankIcon()}</span>
       </div>
-      <div className="team-label">
-        {team}
-        <span className="team-mood">{getTeamMood()}</span>
-        {streak > 0 && <span className="streak-indicator">🔥{streak}</span>}
+      
+      {/* Team label */}
+      <div className="flex items-center space-x-2 w-24 text-sm font-medium">
+        <span className="text-white">{team}</span>
+        <span className="text-lg">{getTeamMood()}</span>
+        {streak > 0 && (
+          <span className="text-orange-400 text-xs">🔥{streak}</span>
+        )}
       </div>
-      <div className="bar-container">
+      
+      {/* Bar container */}
+      <div className="flex-1 mx-4">
         <animated.div
-          className="bar"
+          className={`h-8 rounded-full relative transition-all duration-200 ${
+            data.vuln_total_team > 70 ? 'ring-2 ring-red-500' : ''
+          }`}
           style={{
             width: springProps.width,
             backgroundColor: color,
-            height: '40px',
-            borderRadius: '20px',
-            position: 'relative',
-            transition: 'all 0.2s ease', // Temps de transition réduit
-            border: data.vuln_total_team > 70 ? '2px solid #ff4444' : '2px solid rgba(255,255,255,0.2)',
             minWidth: '20px',
-            // Dégradé simplifié pour de meilleures performances
             background: data.vuln_total_team > 70 ? 
-              `linear-gradient(135deg, ${color}, #ff4444)` : 
+              `linear-gradient(135deg, ${color}, #ef4444)` : 
               color
           }}
         >
-          <div className="vulnerability-info">
-            <span className="vuln-count">{data.vuln_total_team} vulns</span>
-            <span className="vuln-percentage">({Math.round((data.vuln_total_team / maxVulns) * 100)}%)</span>
+          {/* Vulnerability info */}
+          <div className="absolute left-2 top-0 h-full flex items-center space-x-2 text-xs font-medium text-white">
+            <span>{data.vuln_total_team} vulns</span>
+            <span className="text-gray-200">
+              ({Math.round((data.vuln_total_team / maxVulns) * 100)}%)
+            </span>
           </div>
           
-          {/* Indicateurs simplifiés */}
+          {/* Max vulnerability indicator */}
           {data.vuln_total_team === maxVulns && (
-            <div className="max-vulns-indicator">🚨 PLUS DE VULNS</div>
+            <div className="absolute -top-8 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+              🚨 MOST VULNERABILITIES
+            </div>
           )}
-          
-          {/* Effets de pulsation complexes supprimés pour de meilleures performances */}
         </animated.div>
       </div>
     </animated.div>

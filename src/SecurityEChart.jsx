@@ -83,17 +83,18 @@ const SecurityEChart = ({ data, currentFrame, colors }) => {
     // ECharts configuration
     const option = {
       title: {
-        text: '🛡️ Security Vulnerabilities by Team',
+        text: '🛡️ Security Champion Dashboard – Tribute to ISO',
         subtext: currentDate,
         left: 'center',
+        top: '2%',
         textStyle: {
           color: '#fff',
-          fontSize: 20,
+          fontSize: 18,
           fontWeight: 'bold'
         },
         subtextStyle: {
           color: '#bbb',
-          fontSize: 14
+          fontSize: 13
         }
       },
       tooltip: {
@@ -123,18 +124,11 @@ const SecurityEChart = ({ data, currentFrame, colors }) => {
           `;
         }
       },
-      legend: {
-        data: ['Vulnerabilities'],
-        textStyle: {
-          color: '#fff'
-        },
-        top: '8%'
-      },
       grid: {
         left: '25%',
         right: '20%',
         bottom: '25%',
-        top: '35%',
+        top: '25%',
         containLabel: true
       },
       xAxis: [

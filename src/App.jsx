@@ -373,25 +373,13 @@ function App() {
       <header className="relative z-10 w-full p-6 border-b border-gray-700/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-2xl md:text-4xl font-bold text-center bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-4">
-            🛡️ Security Vulnerability Race Dashboard
+            🛡️ Security Champion Dashboard – Tribute to ISO
             {celebratingTeam && (
               <span className="block text-lg md:text-xl text-yellow-400 mt-2">
                 🔥 {celebratingTeam} is leading the charge!
               </span>
             )}
           </h1>
-          
-          {/* Fun fact banner */}
-          <Card variant="highlight" className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border-indigo-500/30">
-            <div className="text-center">
-              <div className="text-sm md:text-base font-medium text-indigo-300 mb-2">
-                {currentFunFact}
-              </div>
-              <div className="text-xs md:text-sm text-gray-400">
-                📊 Longer bars = More vulnerabilities | 🏆 Shorter bars = Fewer vulnerabilities = Winner!
-              </div>
-            </div>
-          </Card>
         </div>
       </header>
 

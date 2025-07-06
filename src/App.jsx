@@ -385,24 +385,6 @@ function App() {
 
       {/* Main content */}
       <main className="relative z-10 max-w-7xl mx-auto p-6">
-        {/* Date and Progress Display */}
-        <Card className="mb-6">
-          <div className="text-center mb-4">
-            <div className="text-2xl md:text-3xl font-bold text-blue-400 mb-2">
-              {new Date(currentDate).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </div>
-            <div className="text-sm text-gray-400">
-              Checkpoint {currentFrame + 1} of {uniqueDates.length}
-            </div>
-          </div>
-          
-          <ProgressBar progress={((currentFrame + 1) / uniqueDates.length) * 100} />
-        </Card>
-
         {/* Summary Statistics */}
         <Card className="mb-8">
           <SectionHeader 

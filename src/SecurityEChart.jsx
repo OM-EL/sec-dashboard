@@ -41,7 +41,7 @@ const SecurityEChart = ({ data, currentFrame, colors }) => {
       if (!teamAggregates[item.team]) {
         teamAggregates[item.team] = {
           security_score: 0,
-          vuln_total_team: item.vuln_total_team,
+          vuln_total_team: 0, // Will be calculated
           projects: [],
           total_critical: 0,
           total_high: 0,
@@ -57,12 +57,18 @@ const SecurityEChart = ({ data, currentFrame, colors }) => {
       teamAggregates[item.team].total_low += item.low_count || 0;
     });
 
-    // Calculate average security score per team
+    // Calculate team totals consistently
     Object.keys(teamAggregates).forEach(team => {
       const projects = teamAggregates[team].projects;
       teamAggregates[team].security_score = Math.round(
         projects.reduce((sum, p) => sum + p.security_score, 0) / projects.length
       );
+      // Calculate total vulnerabilities from sum of all severity levels
+      teamAggregates[team].vuln_total_team = 
+        teamAggregates[team].total_critical + 
+        teamAggregates[team].total_high + 
+        teamAggregates[team].total_medium + 
+        teamAggregates[team].total_low;
     });
 
     // Sort teams by vulnerability count (ascending - fewer vulnerabilities is better)
@@ -118,28 +124,32 @@ const SecurityEChart = ({ data, currentFrame, colors }) => {
         }
       },
       legend: {
-        data: ['Vulnerabilities', 'Security Score'],
+        data: ['Vulnerabilities'],
         textStyle: {
           color: '#fff'
         },
-        top: '10%'
+        top: '8%'
       },
       grid: {
-        left: '15%',
-        right: '10%',
-        bottom: '15%',
-        top: '25%',
+        left: '25%',
+        right: '20%',
+        bottom: '25%',
+        top: '35%',
         containLabel: true
       },
       xAxis: [
         {
           type: 'value',
-          name: 'Vulnerability Count',
+          name: 'Vulnerabilities',
+          nameLocation: 'middle',
+          nameGap: 30,
           nameTextStyle: {
-            color: '#fff'
+            color: '#fff',
+            fontSize: 12
           },
           axisLabel: {
-            color: '#fff'
+            color: '#fff',
+            fontSize: 11
           },
           axisLine: {
             lineStyle: {
@@ -151,24 +161,6 @@ const SecurityEChart = ({ data, currentFrame, colors }) => {
               color: '#444'
             }
           }
-        },
-        {
-          type: 'value',
-          name: 'Security Score',
-          nameTextStyle: {
-            color: '#fff'
-          },
-          axisLabel: {
-            color: '#fff'
-          },
-          axisLine: {
-            lineStyle: {
-              color: '#fff'
-            }
-          },
-          splitLine: {
-            show: false
-          }
         }
       ],
       yAxis: {
@@ -176,12 +168,19 @@ const SecurityEChart = ({ data, currentFrame, colors }) => {
         data: teamNames,
         axisLabel: {
           color: '#fff',
-          fontSize: 12
+          fontSize: 12,
+          interval: 0,
+          margin: 15,
+          width: 60,
+          overflow: 'truncate'
         },
         axisLine: {
           lineStyle: {
             color: '#fff'
           }
+        },
+        axisTick: {
+          show: false
         }
       },
       series: [
@@ -198,35 +197,28 @@ const SecurityEChart = ({ data, currentFrame, colors }) => {
             show: true,
             position: 'right',
             color: '#fff',
-            fontSize: 12,
-            formatter: '{c} vulns'
+            fontSize: 11,
+            formatter: function(params) {
+              const team = teamNames[params.dataIndex];
+              const score = securityScores[params.dataIndex];
+              return `${params.value} vulns (Score: ${score})`;
+            },
+            offset: [10, 0],
+            rich: {
+              vulns: {
+                color: '#fff',
+                fontSize: 11
+              },
+              score: {
+                color: '#2ecc71',
+                fontSize: 10
+              }
+            }
           },
           animationDuration: 1000,
-          animationEasing: 'elasticOut'
-        },
-        {
-          name: 'Security Score',
-          type: 'line',
-          xAxisIndex: 1,
-          data: securityScores.map((score, index) => ({
-            value: score,
-            itemStyle: {
-              color: '#2ecc71'
-            }
-          })),
-          lineStyle: {
-            color: '#2ecc71',
-            width: 2
-          },
-          symbol: 'circle',
-          symbolSize: 8,
-          label: {
-            show: true,
-            position: 'right',
-            color: '#2ecc71',
-            fontSize: 10,
-            formatter: '{c}'
-          }
+          animationEasing: 'elasticOut',
+          barWidth: '50%',
+          barGap: '20%'
         }
       ],
       backgroundColor: 'transparent',
@@ -240,10 +232,11 @@ const SecurityEChart = ({ data, currentFrame, colors }) => {
   };
 
   return (
-    <div className="w-full h-96 bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg p-4">
+    <div className="w-full h-[500px] bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg p-4 backdrop-blur-sm border border-gray-700/50">
       <div
         ref={chartRef}
         className="w-full h-full"
+        style={{ minHeight: '450px' }}
       />
     </div>
   );

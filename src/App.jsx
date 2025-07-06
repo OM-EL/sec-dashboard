@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSpring, animated } from 'react-spring'
 import Confetti from 'react-confetti'
-import Particles from '@tsparticles/react'
-import { loadSlim } from '@tsparticles/slim'
 import SecurityEChart from './SecurityEChart'
+import VulnerabilityHeatmap from './VulnerabilityHeatmap'
+import { Card, MetricCard, Button, ProgressBar, SectionHeader, Grid, Callout, Loading, Badge } from './components/UIComponents'
 import metricsData from './metrics.json'
 
 function App() {
@@ -15,7 +15,6 @@ function App() {
   const [selectedTeam, setSelectedTeam] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showConfetti, setShowConfetti] = useState(false)
-  const [particlesInit, setParticlesInit] = useState(false)
   const [celebratingTeam, setCelebratingTeam] = useState(null)
   const [streaks, setStreaks] = useState({})
   const [soundEnabled, setSoundEnabled] = useState(false)
@@ -68,10 +67,7 @@ function App() {
   }
 
   // Initialize particles engine
-  const initParticles = async (engine) => {
-    await loadSlim(engine)
-    setParticlesInit(true)
-  }
+  // Removed particles to fix React hook issues
 
   // Rotation des faits amusants (simplifiée)
   useEffect(() => {
@@ -133,11 +129,19 @@ function App() {
           if (!teamAggregates[item.team]) {
             teamAggregates[item.team] = {
               security_score: 0,
-              vuln_total_team: item.vuln_total_team,
-              projects: []
+              vuln_total_team: 0,
+              projects: [],
+              total_critical: 0,
+              total_high: 0,
+              total_medium: 0,
+              total_low: 0
             }
           }
           teamAggregates[item.team].projects.push(item)
+          teamAggregates[item.team].total_critical += item.critical_count
+          teamAggregates[item.team].total_high += item.high_count
+          teamAggregates[item.team].total_medium += item.medium_count || 0
+          teamAggregates[item.team].total_low += item.low_count || 0
         })
 
         Object.keys(teamAggregates).forEach(team => {
@@ -145,6 +149,12 @@ function App() {
           teamAggregates[team].security_score = Math.round(
             projects.reduce((sum, p) => sum + p.security_score, 0) / projects.length
           )
+          // Calculate total vulnerabilities consistently
+          teamAggregates[team].vuln_total_team = 
+            teamAggregates[team].total_critical + 
+            teamAggregates[team].total_high + 
+            teamAggregates[team].total_medium + 
+            teamAggregates[team].total_low
         })
 
         const currentRankings = {}
@@ -156,7 +166,7 @@ function App() {
         })
 
         // Simple streak tracking without complex achievement system
-        Object.keys(currentScores).forEach(team => {
+        Object.keys(teamAggregates).forEach(team => {
           const currentVulns = teamAggregates[team]?.vuln_total_team || 0
           const previousVulns = previousScores[team] || currentVulns
           
@@ -184,7 +194,7 @@ function App() {
     return (
       <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <Loading size="lg" className="mx-auto mb-4" />
           <div className="text-xl font-semibold text-white">Loading Dashboard...</div>
           <div className="text-gray-400">Preparing security metrics</div>
         </div>
@@ -195,11 +205,11 @@ function App() {
   if (!metricsData || metricsData.length === 0) {
     return (
       <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black flex items-center justify-center">
-        <div className="text-center bg-red-900/20 border border-red-700/50 rounded-lg p-8">
+        <Card variant="highlight" className="text-center bg-red-900/20 border-red-700/50">
           <div className="text-6xl mb-4">⚠️</div>
           <div className="text-xl font-semibold text-red-400 mb-2">No Data Available</div>
           <div className="text-gray-400">Please check the metrics.json file</div>
-        </div>
+        </Card>
       </div>
     )
   }
@@ -217,7 +227,7 @@ function App() {
       if (!teamAggregates[item.team]) {
         teamAggregates[item.team] = {
           security_score: 0,
-          vuln_total_team: item.vuln_total_team,
+          vuln_total_team: 0, // Initialize to 0, will be calculated
           projects: [],
           total_critical: 0,
           total_high: 0,
@@ -233,12 +243,19 @@ function App() {
       teamAggregates[item.team].total_low += item.low_count || 0
     })
 
-    // Calculate average security score per team
+    // Calculate team totals correctly
     Object.keys(teamAggregates).forEach(team => {
       const projects = teamAggregates[team].projects
+      // Calculate average security score per team
       teamAggregates[team].security_score = Math.round(
         projects.reduce((sum, p) => sum + p.security_score, 0) / projects.length
       )
+      // Calculate total vulnerabilities from sum of all severity levels
+      teamAggregates[team].vuln_total_team = 
+        teamAggregates[team].total_critical + 
+        teamAggregates[team].total_high + 
+        teamAggregates[team].total_medium + 
+        teamAggregates[team].total_low
     })
 
     return teamAggregates
@@ -249,9 +266,13 @@ function App() {
     .sort(([,a], [,b]) => a.vuln_total_team - b.vuln_total_team)
     .slice(0, 10)
 
-  // Trouver le maximum de vulnérabilités pour le calcul de la largeur des barres (inversé pour l'affichage)
-  const maxVulns = Math.max(...sortedTeams.map(([,data]) => data.vuln_total_team))
-  const minVulns = Math.min(...sortedTeams.map(([,data]) => data.vuln_total_team))
+  // Find the actual maximum and minimum vulnerabilities across ALL teams (not just sorted)
+  const allTeamVulns = Object.values(teamData).map(data => data.vuln_total_team)
+  const maxVulns = Math.max(...allTeamVulns)
+  const minVulns = Math.min(...allTeamVulns)
+  
+  // Find which team has the maximum vulnerabilities
+  const teamWithMaxVulns = Object.entries(teamData).find(([,data]) => data.vuln_total_team === maxVulns)?.[0]
 
   // Calculate call-outs
   const calculateCallouts = () => {
@@ -314,58 +335,25 @@ function App() {
   }
 
   const handleParticlesInit = (main) => {
-    loadSlim(main)
-    setParticlesInit(true)
+    // Removed particles functionality
   }
 
-  const particlesConfig = {
-    particles: {
-      number: {
-        value: 20, // Réduit de 50 pour de meilleures performances
-        density: {
-          enable: true,
-          area: 1000
-        }
-      },
-      color: {
-        value: ["#e74c3c", "#3498db", "#2980b9", "#27ae60", "#f39c12"]
-      },
-      shape: {
-        type: "circle" // Simplifié de "star"
-      },
-      opacity: {
-        value: 0.4, // Opacité réduite
-        random: false
-      },
-      size: {
-        value: 2,
-        random: false // Disabled random for better performance
-      },
-      move: {
-        enable: true,
-        speed: 1, // Vitesse réduite
-        direction: "none",
-        random: false,
-        straight: false,
-        outMode: "bounce"
-      }
-    },
-    interactivity: {
-      detectsOn: "canvas",
-      events: {
-        onHover: {
-          enable: false // Disabled for better performance
-        },
-        onClick: {
-          enable: false // Disabled for better performance
-        }
-      }
-    },
-    retina_detect: false // Disabled for better performance
-  }
+  // Removed particles config to fix React hook issues
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black text-white relative overflow-hidden">
+      {/* Animated background dots - Pure Tailwind */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute w-2 h-2 bg-blue-500/20 rounded-full animate-ping"></div>
+        <div className="absolute w-1 h-1 bg-purple-500/20 rounded-full animate-pulse top-1/5 left-4/5"></div>
+        <div className="absolute w-3 h-3 bg-green-500/20 rounded-full animate-bounce top-3/5 left-1/5"></div>
+        <div className="absolute w-1 h-1 bg-red-500/20 rounded-full animate-ping top-4/5 left-3/5"></div>
+        <div className="absolute w-2 h-2 bg-yellow-500/20 rounded-full animate-pulse top-2/5 right-10"></div>
+        <div className="absolute w-1 h-1 bg-indigo-500/20 rounded-full animate-bounce top-1/3 left-1/2"></div>
+        <div className="absolute w-2 h-2 bg-pink-500/20 rounded-full animate-ping top-3/4 left-2/5"></div>
+        <div className="absolute w-1 h-1 bg-cyan-500/20 rounded-full animate-pulse top-1/2 left-1/6"></div>
+      </div>
+      
       {/* Confetti celebration */}
       {showConfetti && (
         <Confetti
@@ -378,12 +366,7 @@ function App() {
       )}
       
       {/* Background particles */}
-      <Particles
-        id="tsparticles"
-        init={initParticles}
-        options={particlesConfig}
-        className="absolute inset-0 z-0"
-      />
+      {/* Removed Particles component to fix React hook issues */}
       
       {/* Header */}
       <header className="relative z-10 w-full p-6 border-b border-gray-700/50 backdrop-blur-sm">
@@ -398,7 +381,7 @@ function App() {
           </h1>
           
           {/* Fun fact banner */}
-          <div className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border border-indigo-500/30 rounded-lg p-4 mb-6">
+          <Card variant="highlight" className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border-indigo-500/30 mb-6">
             <div className="text-center">
               <div className="text-sm md:text-base font-medium text-indigo-300 mb-2">
                 {currentFunFact}
@@ -407,34 +390,30 @@ function App() {
                 📊 Longer bars = More vulnerabilities | 🏆 Shorter bars = Fewer vulnerabilities = Winner!
               </div>
             </div>
-          </div>
+          </Card>
           
           {/* Controls */}
           <div className="flex flex-wrap justify-center gap-4 items-center">
-            <button 
+            <Button 
               onClick={togglePlayPause}
-              className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+              variant="success"
             >
               {isPlaying ? '⏸️ Pause' : '▶️ Play'}
-            </button>
+            </Button>
             
-            <button 
+            <Button 
               onClick={resetRace}
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg"
+              variant="warning"
             >
               🔄 Reset
-            </button>
+            </Button>
             
-            <button 
+            <Button 
               onClick={() => setSoundEnabled(!soundEnabled)}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg ${
-                soundEnabled 
-                  ? 'bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600' 
-                  : 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700'
-              }`}
+              variant={soundEnabled ? 'success' : 'secondary'}
             >
               {soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF'}
-            </button>
+            </Button>
             
             <div className="flex flex-col items-center space-y-2">
               <label className="text-sm font-medium text-gray-300">
@@ -447,7 +426,7 @@ function App() {
                 step="0.2"
                 value={speed}
                 onChange={(e) => setSpeed(parseFloat(e.target.value))}
-                className="w-24 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                className="w-24 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
               />
             </div>
           </div>
@@ -457,7 +436,7 @@ function App() {
       {/* Main content */}
       <main className="relative z-10 max-w-7xl mx-auto p-6">
         {/* Date and Progress Display */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 mb-6 border border-gray-700/50">
+        <Card className="mb-6">
           <div className="text-center mb-4">
             <div className="text-2xl md:text-3xl font-bold text-blue-400 mb-2">
               {new Date(currentDate).toLocaleDateString('en-US', {
@@ -471,44 +450,80 @@ function App() {
             </div>
           </div>
           
-          <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 ease-out"
-              style={{ width: `${((currentFrame + 1) / uniqueDates.length) * 100}%` }}
+          <ProgressBar progress={((currentFrame + 1) / uniqueDates.length) * 100} />
+        </Card>
+
+        {/* Summary Statistics */}
+        <Card className="mb-8">
+          <SectionHeader 
+            title="Security Overview"
+            subtitle="Total vulnerabilities across all teams"
+            icon="📊"
+          />
+          <Grid cols={4} gap={4}>
+            <MetricCard
+              title="Total Critical"
+              value={Object.values(teamData).reduce((sum, team) => sum + team.total_critical, 0)}
+              color="red"
+              icon="🔴"
+            />
+            <MetricCard
+              title="Total High"
+              value={Object.values(teamData).reduce((sum, team) => sum + team.total_high, 0)}
+              color="orange"
+              icon="🟠"
+            />
+            <MetricCard
+              title="Total Medium"
+              value={Object.values(teamData).reduce((sum, team) => sum + team.total_medium, 0)}
+              color="yellow"
+              icon="🟡"
+            />
+            <MetricCard
+              title="Total Low"
+              value={Object.values(teamData).reduce((sum, team) => sum + team.total_low, 0)}
+              color="blue"
+              icon="🔵"
+            />
+          </Grid>
+        </Card>
+
+        {/* Charts - Vertical Layout */}
+        <div className="space-y-8">
+          <div className="w-full">
+            <SecurityEChart 
+              data={metricsData}
+              currentFrame={currentFrame}
+              colors={colors}
+            />
+          </div>
+          <div className="w-full">
+            <VulnerabilityHeatmap 
+              data={metricsData}
+              currentFrame={currentFrame}
+              colors={colors}
             />
           </div>
         </div>
 
-        {/* ECharts Visualization */}
-        <div className="mb-8">
-          <SecurityEChart 
-            data={metricsData}
-            currentFrame={currentFrame}
-            colors={colors}
-          />
-        </div>
-
         {/* Racing Chart */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700/50 mb-6">
-          <div className="mb-6">
-            <h3 className="text-xl md:text-2xl font-bold text-center mb-2">
-              🎯 Vulnerability Count by Team
-            </h3>
-            <div className="text-center text-sm text-gray-400">
-              Bar length = Number of vulnerabilities
+        <Card className="mb-6">
+          <SectionHeader 
+            title="Vulnerability Count by Team"
+            subtitle="Bar length = Number of vulnerabilities"
+            icon="🎯"
+          />
+          
+          {/* Scale reference */}
+          <div className="flex items-center justify-center space-x-4 mt-4 mb-6 text-xs">
+            <div className="flex items-center space-x-2">
+              <span className="text-green-400">0 vulnerabilities</span>
+              <div className="w-8 h-2 bg-green-500 rounded"></div>
             </div>
-            
-            {/* Scale reference */}
-            <div className="flex items-center justify-center space-x-4 mt-4 text-xs">
-              <div className="flex items-center space-x-2">
-                <span className="text-green-400">0 vulnerabilities</span>
-                <div className="w-8 h-2 bg-green-500 rounded"></div>
-              </div>
-              <span className="text-gray-400">→</span>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-2 bg-red-500 rounded"></div>
-                <span className="text-red-400">{maxVulns} vulnerabilities</span>
-              </div>
+            <span className="text-gray-400">→</span>
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-2 bg-red-500 rounded"></div>
+              <span className="text-red-400">{maxVulns} vulnerabilities</span>
             </div>
           </div>
           
@@ -527,50 +542,53 @@ function App() {
                 rank={index + 1}
                 streak={streaks[team] || 0}
                 isCelebrating={celebratingTeam === team}
+                teamWithMaxVulns={teamWithMaxVulns}
               />
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Team Details */}
         {selectedTeam && (
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700/50 mb-6">
-            <h3 className="text-xl md:text-2xl font-bold mb-4 text-center">
-              📊 {selectedTeam} Team Details
-            </h3>
+          <Card className="mb-6">
+            <SectionHeader 
+              title={`${selectedTeam} Team Details`}
+              icon="📊"
+            />
             
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-              <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-                <h4 className="text-sm font-medium text-gray-300 mb-2">Total Vulnerabilities</h4>
-                <div className="text-2xl font-bold text-red-400">{teamData[selectedTeam].vuln_total_team}</div>
-              </div>
-              
-              <div className="bg-red-900/30 rounded-lg p-4 text-center border border-red-700/50">
-                <h4 className="text-sm font-medium text-red-300 mb-2">Critical</h4>
-                <div className="text-2xl font-bold text-red-400">{teamData[selectedTeam].total_critical}</div>
-              </div>
-              
-              <div className="bg-orange-900/30 rounded-lg p-4 text-center border border-orange-700/50">
-                <h4 className="text-sm font-medium text-orange-300 mb-2">High</h4>
-                <div className="text-2xl font-bold text-orange-400">{teamData[selectedTeam].total_high}</div>
-              </div>
-              
-              <div className="bg-yellow-900/30 rounded-lg p-4 text-center border border-yellow-700/50">
-                <h4 className="text-sm font-medium text-yellow-300 mb-2">Medium</h4>
-                <div className="text-2xl font-bold text-yellow-400">{teamData[selectedTeam].total_medium}</div>
-              </div>
-              
-              <div className="bg-blue-900/30 rounded-lg p-4 text-center border border-blue-700/50">
-                <h4 className="text-sm font-medium text-blue-300 mb-2">Low</h4>
-                <div className="text-2xl font-bold text-blue-400">{teamData[selectedTeam].total_low}</div>
-              </div>
-            </div>
+            <Grid cols={5} gap={4} className="mb-6">
+              <MetricCard
+                title="Total Vulnerabilities"
+                value={teamData[selectedTeam].vuln_total_team}
+                color="gray"
+              />
+              <MetricCard
+                title="Critical"
+                value={teamData[selectedTeam].total_critical}
+                color="red"
+              />
+              <MetricCard
+                title="High"
+                value={teamData[selectedTeam].total_high}
+                color="orange"
+              />
+              <MetricCard
+                title="Medium"
+                value={teamData[selectedTeam].total_medium}
+                color="yellow"
+              />
+              <MetricCard
+                title="Low"
+                value={teamData[selectedTeam].total_low}
+                color="blue"
+              />
+            </Grid>
             
             <div>
-              <h4 className="text-lg font-semibold mb-3">
+              <h4 className="text-lg font-semibold mb-3 text-white">
                 Projects ({teamData[selectedTeam].projects.length})
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Grid cols={3} gap={4}>
                 {teamData[selectedTeam].projects.map((project, idx) => (
                   <div key={idx} className="bg-gray-700/50 rounded-lg p-4 border border-gray-600/50">
                     <div className="font-medium text-blue-300 mb-1">{project.project}</div>
@@ -578,58 +596,41 @@ function App() {
                     <div className="text-sm text-red-400">{project.vuln_total_project} vulnerabilities</div>
                   </div>
                 ))}
-              </div>
+              </Grid>
             </div>
-          </div>
+          </Card>
         )}
 
         {/* Callouts */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-br from-green-800/30 to-emerald-800/30 rounded-lg p-6 border border-green-700/50">
-            <h3 className="text-lg font-bold text-green-300 mb-2 flex items-center">
-              🚀 <span className="ml-2">Top Mover</span>
-            </h3>
-            <div className="text-2xl font-bold text-white mb-1">
-              {topMover?.team || '-'}
-            </div>
-            <div className="text-lg text-green-400">
-              {topMover ? `+${topMover.delta.toFixed(1)}` : '-'}
-            </div>
-            {topMover && <div className="text-xl">✨</div>}
-          </div>
-          
-          <div className="bg-gradient-to-br from-orange-800/30 to-red-800/30 rounded-lg p-6 border border-orange-700/50">
-            <h3 className="text-lg font-bold text-orange-300 mb-2 flex items-center">
-              🐢 <span className="ml-2">Needs Boost</span>
-            </h3>
-            <div className="text-2xl font-bold text-white mb-1">
-              {slowestMover?.team || '-'}
-            </div>
-            <div className="text-lg text-orange-400">
-              {slowestMover ? `${slowestMover.delta.toFixed(1)}` : '-'}
-            </div>
-            {slowestMover && <div className="text-xl animate-pulse">⚠️</div>}
-          </div>
-          
-          <div className="bg-gradient-to-br from-purple-800/30 to-pink-800/30 rounded-lg p-6 border border-purple-700/50">
-            <h3 className="text-lg font-bold text-purple-300 mb-2 flex items-center">
-              🦄 <span className="ml-2">Dark Horse</span>
-            </h3>
-            <div className="text-2xl font-bold text-white mb-1">
-              {darkHorse?.team || '-'}
-            </div>
-            <div className="text-lg text-purple-400">
-              {darkHorse ? `+${darkHorse.improvement} ranks` : '-'}
-            </div>
-            {darkHorse && <div className="text-xl animate-bounce">⭐</div>}
-          </div>
-        </div>
+        <Grid cols={3} gap={6}>
+          <Callout
+            title="Top Mover"
+            value={topMover?.team || '-'}
+            description={topMover ? `+${topMover.delta.toFixed(1)}` : '-'}
+            color="green"
+            icon="🚀"
+          />
+          <Callout
+            title="Needs Boost"
+            value={slowestMover?.team || '-'}
+            description={slowestMover ? `${slowestMover.delta.toFixed(1)}` : '-'}
+            color="orange"
+            icon="🐢"
+          />
+          <Callout
+            title="Dark Horse"
+            value={darkHorse?.team || '-'}
+            description={darkHorse ? `+${darkHorse.improvement} ranks` : '-'}
+            color="purple"
+            icon="🦄"
+          />
+        </Grid>
       </main>
     </div>
   )
 }
 
-const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSelected, rank, streak, isCelebrating }) => {
+const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSelected, rank, streak, isCelebrating, teamWithMaxVulns }) => {
   // Calculate bar width: directly proportional to vulnerability count
   const barWidth = Math.max((data.vuln_total_team / maxVulns) * 100, 5) // Minimum 5% width
   
@@ -676,21 +677,21 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
         <span className="text-white">{team}</span>
         <span className="text-lg">{getTeamMood()}</span>
         {streak > 0 && (
-          <span className="text-orange-400 text-xs">🔥{streak}</span>
+          <Badge color="orange" size="sm">
+            🔥{streak}
+          </Badge>
         )}
       </div>
       
       {/* Bar container */}
       <div className="flex-1 mx-4">
         <animated.div
-          className={`h-8 rounded-full relative transition-all duration-200 ${
+          className={`h-8 rounded-full relative transition-all duration-200 min-w-5 ${
             data.vuln_total_team > 70 ? 'ring-2 ring-red-500' : ''
           }`}
           style={{
             width: springProps.width,
-            backgroundColor: color,
-            minWidth: '20px',
-            background: data.vuln_total_team > 70 ? 
+            backgroundColor: data.vuln_total_team > 70 ? 
               `linear-gradient(135deg, ${color}, #ef4444)` : 
               color
           }}
@@ -704,9 +705,11 @@ const BarItem = ({ team, data, index, maxVulns, minVulns, color, onClick, isSele
           </div>
           
           {/* Max vulnerability indicator */}
-          {data.vuln_total_team === maxVulns && (
-            <div className="absolute -top-8 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
-              🚨 MOST VULNERABILITIES
+          {team === teamWithMaxVulns && (
+            <div className="absolute -top-8 left-2">
+              <Badge color="red" size="sm" className="font-bold">
+                🚨 MOST VULNERABILITIES
+              </Badge>
             </div>
           )}
         </animated.div>

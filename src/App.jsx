@@ -570,8 +570,6 @@ function App() {
         onPlayPause={togglePlayPause}
         onReset={resetRace}
         onSpeedChange={setSpeed}
-        soundEnabled={soundEnabled}
-        onSoundToggle={() => setSoundEnabled(!soundEnabled)}
       />
     </div>
   )

@@ -3,6 +3,7 @@ import { useSpring, animated } from 'react-spring'
 import Confetti from 'react-confetti'
 import SecurityEChart from './SecurityEChart'
 import VulnerabilityHeatmap from './VulnerabilityHeatmap'
+import FloatingDatePopup from './components/FloatingDatePopup'
 import { Card, MetricCard, Button, ProgressBar, SectionHeader, Grid, Callout, Loading, Badge } from './components/UIComponents'
 import metricsData from './metrics.json'
 
@@ -381,7 +382,7 @@ function App() {
           </h1>
           
           {/* Fun fact banner */}
-          <Card variant="highlight" className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border-indigo-500/30 mb-6">
+          <Card variant="highlight" className="bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border-indigo-500/30">
             <div className="text-center">
               <div className="text-sm md:text-base font-medium text-indigo-300 mb-2">
                 {currentFunFact}
@@ -391,45 +392,6 @@ function App() {
               </div>
             </div>
           </Card>
-          
-          {/* Controls */}
-          <div className="flex flex-wrap justify-center gap-4 items-center">
-            <Button 
-              onClick={togglePlayPause}
-              variant="success"
-            >
-              {isPlaying ? '⏸️ Pause' : '▶️ Play'}
-            </Button>
-            
-            <Button 
-              onClick={resetRace}
-              variant="warning"
-            >
-              🔄 Reset
-            </Button>
-            
-            <Button 
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              variant={soundEnabled ? 'success' : 'secondary'}
-            >
-              {soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF'}
-            </Button>
-            
-            <div className="flex flex-col items-center space-y-2">
-              <label className="text-sm font-medium text-gray-300">
-                Speed: {speed}x
-              </label>
-              <input
-                type="range"
-                min="0.2"
-                max="3"
-                step="0.2"
-                value={speed}
-                onChange={(e) => setSpeed(parseFloat(e.target.value))}
-                className="w-24 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-              />
-            </div>
-          </div>
         </div>
       </header>
 
@@ -488,16 +450,16 @@ function App() {
           </Grid>
         </Card>
 
-        {/* Charts - Vertical Layout */}
+        {/* Charts - Vertical Layout with Consistent Heights */}
         <div className="space-y-8">
-          <div className="w-full">
+          <div className="w-full h-[500px]">
             <SecurityEChart 
               data={metricsData}
               currentFrame={currentFrame}
               colors={colors}
             />
           </div>
-          <div className="w-full">
+          <div className="w-full h-[500px]">
             <VulnerabilityHeatmap 
               data={metricsData}
               currentFrame={currentFrame}
@@ -527,7 +489,7 @@ function App() {
             </div>
           </div>
           
-          <div className="relative h-96 overflow-hidden">
+          <div className="relative h-[500px] overflow-hidden">
             {sortedTeams.map(([team, data], index) => (
               <BarItem
                 key={team}
@@ -626,6 +588,21 @@ function App() {
           />
         </Grid>
       </main>
+
+      {/* Floating Date Popup */}
+      <FloatingDatePopup
+        currentDate={currentDate}
+        currentFrame={currentFrame}
+        totalFrames={uniqueDates.length}
+        onFrameChange={(frame) => setCurrentFrame(frame)}
+        isPlaying={isPlaying}
+        speed={speed}
+        onPlayPause={togglePlayPause}
+        onReset={resetRace}
+        onSpeedChange={setSpeed}
+        soundEnabled={soundEnabled}
+        onSoundToggle={() => setSoundEnabled(!soundEnabled)}
+      />
     </div>
   )
 }

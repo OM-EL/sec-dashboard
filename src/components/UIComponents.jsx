@@ -32,7 +32,7 @@ export const MetricCard = ({ title, value, color = 'gray', icon = '', className 
   };
   
   return (
-    <div className={`rounded-lg p-4 text-center border ${colorClasses[color]} ${className}`}>
+    <div className={`rounded-lg p-4 text-center border h-24 flex flex-col justify-center ${colorClasses[color]} ${className}`}>
       <h4 className="text-sm font-medium mb-2 opacity-90">
         {icon && <span className="mr-2">{icon}</span>}
         {title}
@@ -137,7 +137,7 @@ export const Callout = ({ title, value, description, color = 'blue', icon = '', 
   };
   
   return (
-    <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-lg p-6 border ${className}`}>
+    <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-lg p-6 border h-32 flex flex-col justify-center ${className}`}>
       <h3 className="text-lg font-bold mb-2 flex items-center">
         {icon && <span className="mr-2 text-xl">{icon}</span>}
         {title}
